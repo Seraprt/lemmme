@@ -5,17 +5,67 @@ import { BannerAd, Smartlink } from '../components/AdSlot';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
+// ── Strength reads ──
 function readHome(v) {
-  if (v < 0.40) return { tone: 'bad', label: 'Weak at home', text: 'They give up their home advantage.' };
-  if (v < 0.60) return { tone: 'warn', label: 'Average', text: 'A normal home record. No major edge.' };
-  if (v < 0.78) return { tone: 'ok', label: 'Strong', text: 'They win most home games and score freely at home.' };
-  return { tone: 'good', label: 'Fortress', text: 'A genuine fortress. Very few sides take points here.' };
+  if (v < 0.4)
+    return { tone: 'bad', label: 'Weak at home', text: 'They give up their home advantage.' };
+  if (v < 0.6)
+    return { tone: 'warn', label: 'Average', text: 'A normal home record. No major edge.' };
+  if (v < 0.78)
+    return { tone: 'ok', label: 'Strong', text: 'They win most home games and score freely at home.' };
+  return {
+    tone: 'good',
+    label: 'Fortress',
+    text: 'A genuine fortress. Very few sides take points here.',
+  };
 }
+
 function readAway(v) {
-  if (v < 0.30) return { tone: 'bad', label: 'Poor traveller', text: 'Below our 0.30 away line — they rarely get results on the road.' };
-  if (v < 0.45) return { tone: 'warn', label: 'Below average', text: 'They travel worse than their league position suggests.' };
-  if (v < 0.65) return { tone: 'ok', label: 'Solid', text: 'A dependable away side that picks up points on the road.' };
-  return { tone: 'good', label: 'Elite away', text: 'One of the best travelling records in the league.' };
+  if (v < 0.3)
+    return {
+      tone: 'bad',
+      label: 'Poor traveller',
+      text: 'Below our 0.30 away line — they rarely get results on the road.',
+    };
+  if (v < 0.45)
+    return {
+      tone: 'warn',
+      label: 'Below average',
+      text: 'They travel worse than their league position suggests.',
+    };
+  if (v < 0.65)
+    return { tone: 'ok', label: 'Solid', text: 'A dependable away side that picks up points on the road.' };
+  return {
+    tone: 'good',
+    label: 'Elite away',
+    text: 'One of the best travelling records in the league.',
+  };
+}
+
+// ── Attack / Defence reads (defence inverted — lower is better) ──
+function readAttack(v) {
+  if (v >= 1.5)
+    return { tone: 'good', label: 'Elite attack', note: 'Scores far above league average — a genuine goal threat.' };
+  if (v >= 1.2)
+    return { tone: 'good', label: 'Strong attack', note: 'Above average — regularly creates and converts chances.' };
+  if (v >= 0.9)
+    return { tone: 'ok', label: 'Average attack', note: 'Around league average for goals scored.' };
+  if (v >= 0.7)
+    return { tone: 'warn', label: 'Weak attack', note: 'Struggles to score — often relies on set pieces.' };
+  return { tone: 'bad', label: 'Very weak attack', note: 'Rarely scores — low attacking output across the season.' };
+}
+
+function readDefence(v) {
+  // LOWER defence_rating = BETTER defence
+  if (v <= 0.7)
+    return { tone: 'good', label: 'Elite defence', note: 'Concedes far less than league average — hard to break down.' };
+  if (v <= 0.9)
+    return { tone: 'good', label: 'Strong defence', note: 'Concedes less than average — a reliable back line.' };
+  if (v <= 1.1)
+    return { tone: 'ok', label: 'Average defence', note: 'Concedes roughly league average.' };
+  if (v <= 1.3)
+    return { tone: 'warn', label: 'Weak defence', note: 'Leaks goals — concedes above league average.' };
+  return { tone: 'bad', label: 'Very weak defence', note: 'Very porous — concedes heavily and often.' };
 }
 
 function FormPills({ form }) {
@@ -23,10 +73,28 @@ function FormPills({ form }) {
   return (
     <div className="form-row">
       {form.map((r, i) => (
-        <span className={`pill ${r}`} key={i}>{r}</span>
+        <span className={`pill ${r}`} key={i}>
+          {r}
+        </span>
       ))}
     </div>
   );
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
+}
+
+function formatDateTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export default function TeamDetail({ teamId, onBack, onCompareWith }) {
@@ -60,10 +128,20 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
 
   const homeRead = readHome(team.home_strength);
   const awayRead = readAway(team.away_strength);
-  const attackPct = pct(team.attack_rating / 2.5);
-  const defencePct = pct(team.defence_rating / 2.5);
-  const homePct = pct(team.home_strength / 3);
-  const awayPct = pct(team.away_strength / 3);
+  const attackRead = readAttack(team.attack_rating || 1.0);
+  const defenceRead = readDefence(team.defence_rating || 1.0);
+
+  // Attack: higher is better. 0 → 0%, 2.5 → 100%
+  const attackPct = Math.min(100, pct((team.attack_rating || 1.0) / 2.5));
+
+  // Defence: INVERT. rating 0.3 (elite) → 100%, rating 2.5 (weak) → 0%
+  const defencePct = Math.max(
+    0,
+    Math.min(100, Math.round(((2.5 - (team.defence_rating || 1.0)) / 2.2) * 100))
+  );
+
+  const homePct = pct((team.home_strength || 1.5) / 3);
+  const awayPct = pct((team.away_strength || 1.0) / 3);
 
   return (
     <div className="screen">
@@ -94,37 +172,131 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </div>
       )}
 
+      {/* ── NEXT MATCH ── */}
+      {team.next_match && team.next_match.opponent && (
+        <>
+          <div className="sec-head">
+            <h2>Next match</h2>
+            <span>{team.next_match.competition}</span>
+          </div>
+          <div className="next-match-card">
+            <div className="next-match-side">
+              <Crest team={team} />
+              <span className="next-team-name">
+                {team.short || team.name.slice(0, 3)}
+              </span>
+            </div>
+            <div className="next-match-mid">
+              <span className="next-vs">VS</span>
+              <span className="next-time">
+                {formatDateTime(team.next_match.date)}
+              </span>
+              <span className="next-venue">
+                {team.next_match.was_home ? 'Home' : 'Away'}
+              </span>
+            </div>
+            <div className="next-match-side">
+              <Crest team={team.next_match.opponent} />
+              <span className="next-team-name">
+                {team.next_match.opponent.short ||
+                  team.next_match.opponent.name.slice(0, 3)}
+              </span>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ── RECENT RESULTS ── */}
+      {team.recent_matches?.length > 0 && (
+        <>
+          <div className="sec-head">
+            <h2>Recent results</h2>
+            <span>Last {team.recent_matches.length}</span>
+          </div>
+          <div className="recent-list">
+            {team.recent_matches.map((m, i) => (
+              <div className="recent-item" key={i}>
+                <span className={`recent-pill ${m.result}`}>{m.result}</span>
+                <div className="recent-teams">
+                  <div className="recent-row">
+                    <span className="recent-side-label">
+                      {m.was_home ? 'H' : 'A'}
+                    </span>
+                    <span className="recent-opp">
+                      {m.was_home ? team.name : m.opponent?.name}
+                    </span>
+                    <span className="recent-score">{m.goals_for}</span>
+                  </div>
+                  <div className="recent-row">
+                    <span className="recent-side-label">
+                      {m.was_home ? 'A' : 'H'}
+                    </span>
+                    <span className="recent-opp">
+                      {m.was_home ? m.opponent?.name : team.name}
+                    </span>
+                    <span className="recent-score">{m.goals_against}</span>
+                  </div>
+                </div>
+                <div className="recent-meta">
+                  <span className="recent-date">{formatDate(m.date)}</span>
+                  <span className="recent-comp">
+                    {m.competition?.slice(0, 18) || ''}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       <div className="sec-head">
         <h2>Team strength</h2>
         <span>0 – 100 scale</span>
       </div>
 
+      {/* Attack */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Attack</span>
-          <span className="meter-val">{attackPct}</span>
+          <span className="meter-val">
+            {pct(team.attack_rating / 2.5)}
+            <span className="meter-sub"> ({team.attack_rating.toFixed(2)}× avg)</span>
+          </span>
         </div>
         <div className="meter-track">
           <i style={{ width: `${attackPct}%`, background: '#C8F751' }} />
         </div>
+        <div className="meter-tags">
+          <span className={`tagline ${attackRead.tone}`}>{attackRead.label}</span>
+        </div>
         <p className="meter-note">
-          How dangerous they are going forward — chance creation and conversion combined.
+          Goals scored relative to league average. 1.00× = league average.{' '}
+          {attackRead.note}
         </p>
       </div>
 
+      {/* Defence */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Defence</span>
-          <span className="meter-val">{defencePct}</span>
+          <span className="meter-val">
+            {defencePct}
+            <span className="meter-sub"> ({team.defence_rating.toFixed(2)}× avg)</span>
+          </span>
         </div>
         <div className="meter-track">
           <i style={{ width: `${defencePct}%`, background: '#5AA9FF' }} />
         </div>
+        <div className="meter-tags">
+          <span className={`tagline ${defenceRead.tone}`}>{defenceRead.label}</span>
+        </div>
         <p className="meter-note">
-          How well they stop the opposition — higher means they concede fewer quality chances.
+          Goals conceded relative to league average. Lower ratio = stronger defence.
+          The bar is inverted so higher = better. {defenceRead.note}
         </p>
       </div>
 
+      {/* Home */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Home strength</span>
@@ -147,6 +319,7 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         <p className="meter-note">{homeRead.text}</p>
       </div>
 
+      {/* Away */}
       <div className="meter" style={{ borderBottom: 0 }}>
         <div className="meter-top">
           <span className="meter-name">Away strength</span>

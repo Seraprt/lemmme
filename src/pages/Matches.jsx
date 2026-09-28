@@ -8,16 +8,16 @@ const pct = (v) => Math.round((v || 0) * 100);
 function dayLabel(offset) {
   const d = new Date();
   d.setDate(d.getDate() + offset);
-  const bot = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  const bot = d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' });
   if (offset === 0) return { top: 'Today', bot };
   if (offset === 1) return { top: 'Tmrw', bot };
-  return { top: d.toLocaleDateString('en-GB', { weekday: 'short' }), bot };
+  return { top: d.toLocaleDateString(undefined, { weekday: 'short' }), bot };
 }
 
 function prettyDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-GB', {
+  return d.toLocaleDateString(undefined, {
     weekday: 'long',
     day: 'numeric',
     month: 'short',
@@ -26,6 +26,7 @@ function prettyDate(dateStr) {
 }
 
 function derivePick(match) {
+  if (match.best_market_label) return match.best_market_label;
   if (match.pick) return match.pick;
   const homeWin = match.home_win_prob || 0;
   const awayWin = match.away_win_prob || 0;
@@ -49,7 +50,7 @@ function MatchCard({ match, isOpen, onToggle }) {
           {match.tournament || 'League'}
         </span>
         <span className="time">
-          {new Date(match.date).toLocaleString('en-GB', {
+          {new Date(match.date).toLocaleString(undefined, {
             weekday: 'short',
             hour: '2-digit',
             minute: '2-digit',
@@ -112,6 +113,16 @@ function MatchCard({ match, isOpen, onToggle }) {
                   {m.key} <b>{m.value}</b>
                 </span>
               ))}
+            </div>
+          )}
+
+          {match.secondary_pick && (
+            <div className="secondary-pick">
+              <span className="secondary-label">Also consider:</span>
+              <span className="secondary-value">
+                {match.secondary_pick.label} (
+                {(match.secondary_pick.probability * 100).toFixed(0)}%)
+              </span>
             </div>
           )}
 
@@ -253,9 +264,7 @@ export default function Matches() {
       </div>
 
       {customDate && (
-        <div className="date-active-pill">
-          📅 Showing {prettyDate(customDate)}
-        </div>
+        <div className="date-active-pill">📅 Showing {prettyDate(customDate)}</div>
       )}
 
       {!customDate && (

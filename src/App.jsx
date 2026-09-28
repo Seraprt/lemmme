@@ -5,12 +5,13 @@ import Matches from './pages/Matches';
 import Compare from './pages/Compare';
 import Search from './pages/Search';
 import TeamDetail from './pages/TeamDetail';
+import Profile from './pages/Profile';
 
 export default function App() {
-  const { user, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const [screen, setScreen] = useState('matches');
   const [openTeamId, setOpenTeamId] = useState(null);
-  const [comparePrefill, setComparePrefill] = useState(null); // set when jumping from team detail
+  const [comparePrefill, setComparePrefill] = useState(null);
 
   if (loading) {
     return (
@@ -40,6 +41,8 @@ export default function App() {
     setOpenTeamId(null);
   }
 
+  const initials = (user.username || '?').slice(0, 2).toUpperCase();
+
   return (
     <div className="app">
       <header className="topbar">
@@ -54,8 +57,12 @@ export default function App() {
             FORM<em>LINE</em>
           </span>
         </div>
-        <button className="avatar" onClick={logout} title="Sign out">
-          {user.username?.slice(0, 2).toUpperCase()}
+        <button
+          className="avatar"
+          onClick={() => setScreen('profile')}
+          title="Profile"
+        >
+          {initials}
         </button>
       </header>
 
@@ -72,39 +79,45 @@ export default function App() {
             onCompareWith={handleCompareWith}
           />
         )}
+        {screen === 'profile' && (
+          <Profile onBack={() => go('matches')} />
+        )}
       </main>
 
-      <nav className="tabbar">
-        <button
-          className={`tab ${screen === 'matches' ? 'active' : ''}`}
-          onClick={() => go('matches')}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="17" rx="3" />
-            <path d="M3 9h18M8 2v4M16 2v4" />
-          </svg>
-          Matches
-        </button>
-        <button
-          className={`tab ${screen === 'compare' ? 'active' : ''}`}
-          onClick={() => go('compare')}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
-          </svg>
-          Compare
-        </button>
-        <button
-          className={`tab ${screen === 'search' || screen === 'team' ? 'active' : ''}`}
-          onClick={() => go('search')}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
-          Teams
-        </button>
-      </nav>
+      {/* Hide tabbar on profile screen */}
+      {screen !== 'profile' && (
+        <nav className="tabbar">
+          <button
+            className={`tab ${screen === 'matches' ? 'active' : ''}`}
+            onClick={() => go('matches')}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="17" rx="3" />
+              <path d="M3 9h18M8 2v4M16 2v4" />
+            </svg>
+            Matches
+          </button>
+          <button
+            className={`tab ${screen === 'compare' ? 'active' : ''}`}
+            onClick={() => go('compare')}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+            </svg>
+            Compare
+          </button>
+          <button
+            className={`tab ${screen === 'search' || screen === 'team' ? 'active' : ''}`}
+            onClick={() => go('search')}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+            Teams
+          </button>
+        </nav>
+      )}
     </div>
   );
 }
