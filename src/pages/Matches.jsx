@@ -3,7 +3,6 @@ import { matchApi } from '../api';
 import Crest from '../components/Crest';
 import { BannerAd, Smartlink } from '../components/AdSlot';
 
-// ─── Helpers ─────────────────────────────────────
 const pct = (v) => Math.round((v || 0) * 100);
 
 function dayLabel(offset) {
@@ -15,38 +14,30 @@ function dayLabel(offset) {
   return { top: d.toLocaleDateString('en-GB', { weekday: 'short' }), bot };
 }
 
-function pickLabel(bestMarket, homeWin, awayWin, draw) {
-  if (bestMarket) {
-    const map = {
-      home_win: 'Home win',
-      away_win: 'Away win',
-      draw: 'Draw',
-      '1X': 'Home or Draw',
-      'X2': 'Draw or Away',
-      '12': 'Home or Away',
-      btts_yes: 'BTTS – Yes',
-      btts_no: 'BTTS – No',
-      over_1_5: 'Over 1.5',
-      over_2_5: 'Over 2.5',
-      under_2_5: 'Under 2.5',
-      under_3_5: 'Under 3.5',
-    };
-    return map[bestMarket] || bestMarket.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  }
-  // Derive from probs
-  const max = Math.max(homeWin || 0, draw || 0, awayWin || 0);
-  if (max === homeWin) return 'Home win';
-  if (max === awayWin) return 'Away win';
+function prettyDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function derivePick(match) {
+  if (match.pick) return match.pick;
+  const homeWin = match.home_win_prob || 0;
+  const awayWin = match.away_win_prob || 0;
+  const draw = match.draw_prob || 0;
+  if (homeWin > awayWin && homeWin > draw) return `${match.home?.name} win`;
+  if (awayWin > homeWin && awayWin > draw) return `${match.away?.name} win`;
   return 'Draw';
 }
 
-// ─── Card ────────────────────────────────────────
 function MatchCard({ match, isOpen, onToggle }) {
-  const homeWin = match.home_win_prob || 0;
-  const drawProb = match.draw_prob || 0;
-  const awayWin = match.away_win_prob || 0;
   const confidence = match.confidence || 0;
-  const pick = pickLabel(match.best_market, homeWin, awayWin, drawProb);
+  const pick = derivePick(match);
   const score = match.correct_score || '—';
 
   return (
@@ -77,9 +68,10 @@ function MatchCard({ match, isOpen, onToggle }) {
           <span className="pred-pick">{pick}</span>
         </div>
         <div className="pred-score">
-          {String(score).replace('-', '–').split('').map((c, i) =>
-            c === '–' ? <i key={i}>–</i> : c
-          )}
+          {String(score)
+            .replace('-', '–')
+            .split('')
+            .map((c, i) => (c === '–' ? <i key={i}>–</i> : c))}
         </div>
         <div className="pred-conf">
           {pct(confidence)}%
@@ -101,7 +93,10 @@ function MatchCard({ match, isOpen, onToggle }) {
 
       {match.reasons?.length > 0 && (
         <>
-          <button className={`why-toggle ${isOpen ? 'open' : ''}`} onClick={onToggle}>
+          <button
+            className={`why-toggle ${isOpen ? 'open' : ''}`}
+            onClick={onToggle}
+          >
             Why this pick ({match.reasons.length})
             <span className="chev">▾</span>
           </button>
@@ -109,7 +104,9 @@ function MatchCard({ match, isOpen, onToggle }) {
             <div className="why">
               {match.reasons.map((r, i) => (
                 <div className="reason" data-tone={r.tone} key={i}>
-                  <span className="reason-w">{Math.round((r.weight || 0) * 100)}</span>
+                  <span className="reason-w">
+                    {Math.round((r.weight || 0) * 100)}
+                  </span>
                   <span className="reason-tag">{r.tag}</span>
                   <p className="reason-title">{r.title}</p>
                   <p className="reason-text">{r.text}</p>
@@ -123,31 +120,38 @@ function MatchCard({ match, isOpen, onToggle }) {
   );
 }
 
-// ─── Page ────────────────────────────────────────
 export default function Matches() {
   const [day, setDay] = useState(0);
+  const [customDate, setCustomDate] = useState('');
   const [league, setLeague] = useState('All');
   const [leagues, setLeagues] = useState(['All']);
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openSet, setOpenSet] = useState(new Set());
 
+  // Load leagues once
   useEffect(() => {
     matchApi.leagues().then(setLeagues).catch(() => {});
   }, []);
 
+  // Fetch matches whenever day / customDate / league changes
   useEffect(() => {
     setLoading(true);
-    const d = new Date();
-    d.setDate(d.getDate() + day);
-    const date = d.toISOString().slice(0, 10);
+    let targetDate;
+    if (customDate) {
+      targetDate = customDate;
+    } else {
+      const d = new Date();
+      d.setDate(d.getDate() + day);
+      targetDate = d.toISOString().slice(0, 10);
+    }
 
     matchApi
-      .analysis({ date, league })
+      .analysis({ date: targetDate, league })
       .then(setMatches)
       .catch(() => setMatches([]))
       .finally(() => setLoading(false));
-  }, [day, league]);
+  }, [day, customDate, league]);
 
   const toggle = (id) => {
     setOpenSet((prev) => {
@@ -156,6 +160,8 @@ export default function Matches() {
       return next;
     });
   };
+
+  const today = new Date().toISOString().slice(0, 10);
 
   const cards = useMemo(() => {
     return matches.map((m, idx) => {
@@ -167,7 +173,6 @@ export default function Matches() {
           onToggle={() => toggle(m.match_id)}
         />
       );
-      // Insert an ad after the 2nd and 5th card
       if (idx === 2 || idx === 5) {
         return (
           <React.Fragment key={`wrap-${m.match_id}`}>
@@ -182,25 +187,77 @@ export default function Matches() {
 
   return (
     <div className="screen">
-      {/* Date strip */}
-      <div className="datestrip">
-        {[0, 1, 2, 3, 4, 5, 6].map((off) => {
-          const l = dayLabel(off);
-          return (
-            <button
-              key={off}
-              className={`date ${day === off ? 'active' : ''}`}
-              onClick={() => {
-                setDay(off);
-                setOpenSet(new Set());
-              }}
-            >
-              <b>{l.top}</b>
-              <span>{l.bot}</span>
-            </button>
-          );
-        })}
+      {/* Custom date picker row */}
+      <div className="date-custom">
+        <label htmlFor="datePicker">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="4" width="18" height="17" rx="3" />
+            <path d="M3 9h18M8 2v4M16 2v4" />
+          </svg>
+          Pick a date
+        </label>
+        <input
+          id="datePicker"
+          type="date"
+          value={customDate}
+          min="2024-01-01"
+          max="2030-12-31"
+          onChange={(e) => {
+            setCustomDate(e.target.value);
+            setOpenSet(new Set());
+          }}
+        />
+        {customDate && (
+          <button
+            className="date-clear"
+            onClick={() => {
+              setCustomDate('');
+              setDay(0);
+              setOpenSet(new Set());
+            }}
+          >
+            ✕
+          </button>
+        )}
       </div>
+
+      {/* Active date pill (shown when custom date is chosen) */}
+      {customDate && (
+        <div className="date-active-pill">
+          📅 Showing {prettyDate(customDate)}
+        </div>
+      )}
+
+      {/* Quick 7-day strip (disabled highlight if custom date is active) */}
+      {!customDate && (
+        <div className="datestrip">
+          {[0, 1, 2, 3, 4, 5, 6].map((off) => {
+            const l = dayLabel(off);
+            return (
+              <button
+                key={off}
+                className={`date ${day === off ? 'active' : ''}`}
+                onClick={() => {
+                  setDay(off);
+                  setOpenSet(new Set());
+                }}
+              >
+                <b>{l.top}</b>
+                <span>{l.bot}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* League chips */}
       <div className="chips">
@@ -218,27 +275,40 @@ export default function Matches() {
         ))}
       </div>
 
-      {/* Smartlink ad at top */}
       <Smartlink text="Sponsored offer" />
 
-      {/* Cards */}
       <div className="list">
         {loading && (
-          <div style={{ padding: 40, textAlign: 'center', color: 'var(--dim)', fontSize: 13 }}>
+          <div
+            style={{
+              padding: 40,
+              textAlign: 'center',
+              color: 'var(--dim)',
+              fontSize: 13,
+            }}
+          >
             Loading predictions…
           </div>
         )}
 
         {!loading && cards.length === 0 && (
-          <div style={{ padding: 60, textAlign: 'center', color: 'var(--dim)', fontSize: 13 }}>
-            No predictions for this filter yet.
+          <div
+            style={{
+              padding: 60,
+              textAlign: 'center',
+              color: 'var(--dim)',
+              fontSize: 13,
+            }}
+          >
+            {customDate
+              ? `No predictions for ${prettyDate(customDate)}.`
+              : 'No predictions for this filter yet.'}
           </div>
         )}
 
         {!loading && cards}
       </div>
 
-      {/* Bottom banner ad */}
       <BannerAd height={90} label="Banner Ad" />
     </div>
   );
