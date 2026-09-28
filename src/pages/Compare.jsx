@@ -7,7 +7,6 @@ import { BannerAd, Smartlink } from '../components/AdSlot';
 const pct = (v) => Math.round((v || 0) * 100);
 
 function barRow(label, v1, v2) {
-  // v1/v2 are already normalized 0-1
   const p1 = Math.min(100, pct(v1));
   const p2 = Math.min(100, pct(v2));
   return (
@@ -28,18 +27,17 @@ function barRow(label, v1, v2) {
 export default function Compare({ prefill, clearPrefill }) {
   const [home, setHome] = useState(null);
   const [away, setAway] = useState(null);
-  const [sheetFor, setSheetFor] = useState(null); // 'home' | 'away' | null
+  const [sheetFor, setSheetFor] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Handle prefill from Team Detail page
   useEffect(() => {
     if (prefill) {
       setHome(prefill);
       setAway(null);
       setResult(null);
-      setSheetFor('away'); // auto-open picker for the other side
+      setSheetFor('away');
       clearPrefill?.();
     }
   }, [prefill, clearPrefill]);
@@ -48,12 +46,21 @@ export default function Compare({ prefill, clearPrefill }) {
     if (!home || !away) return;
     setLoading(true);
     setError('');
+    setResult(null);
     try {
       const res = await predictionApi.compare(home.id, away.id);
+
+      // 🔒 Guard: backend may return { error: "..." }
+      if (res?.error) {
+        throw new Error(res.error);
+      }
+      if (!res?.home_team || !res?.away_team) {
+        throw new Error('Malformed response from server');
+      }
+
       setResult(res);
     } catch (err) {
       setError(err.message || 'Compare failed');
-      setResult(null);
     } finally {
       setLoading(false);
     }
@@ -140,11 +147,11 @@ export default function Compare({ prefill, clearPrefill }) {
         </div>
       )}
 
-      {result && (
+      {result && result.home_team && result.away_team && (
         <>
           <div className="verdict">
             <p className="verdict-eyebrow">Model verdict</p>
-            <p className="verdict-winner">{result.pick || result.winner}</p>
+            <p className="verdict-winner">{result.pick || result.winner || '—'}</p>
             <p className="verdict-score">
               {String(result.predicted_correct_score || '0-0')
                 .split('-')
@@ -187,7 +194,10 @@ export default function Compare({ prefill, clearPrefill }) {
                     {m.key} <b>{m.value}</b>
                   </span>
                 ))}
-                <span className="mkt" style={{ fontSize: 12, padding: '6px 11px' }}>
+                <span
+                  className="mkt"
+                  style={{ fontSize: 12, padding: '6px 11px' }}
+                >
                   Score <b>{result.predicted_correct_score}</b>
                 </span>
               </div>
@@ -203,23 +213,23 @@ export default function Compare({ prefill, clearPrefill }) {
           <div className="card" style={{ margin: '0 16px', padding: '6px 16px' }}>
             {barRow(
               'Attack',
-              result.home_team.attack_rating / 2.5,
-              result.away_team.attack_rating / 2.5
+              (result.home_team.attack_rating ?? 1) / 2.5,
+              (result.away_team.attack_rating ?? 1) / 2.5
             )}
             {barRow(
               'Defence',
-              result.home_team.defence_rating / 2.5,
-              result.away_team.defence_rating / 2.5
+              (result.home_team.defence_rating ?? 1) / 2.5,
+              (result.away_team.defence_rating ?? 1) / 2.5
             )}
             {barRow(
               'Home',
-              result.home_team.home_ppg / 3,
-              result.away_team.home_ppg / 3
+              (result.home_team.home_ppg ?? 1.5) / 3,
+              (result.away_team.home_ppg ?? 1.5) / 3
             )}
             {barRow(
               'Away',
-              result.home_team.away_ppg / 3,
-              result.away_team.away_ppg / 3
+              (result.home_team.away_ppg ?? 1) / 3,
+              (result.away_team.away_ppg ?? 1) / 3
             )}
           </div>
 
