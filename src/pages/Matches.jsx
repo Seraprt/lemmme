@@ -38,12 +38,16 @@ function derivePick(match) {
 function MatchCard({ match, isOpen, onToggle }) {
   const confidence = match.confidence || 0;
   const pick = derivePick(match);
-  const score = match.correct_score || '—';
+  const score = match.correct_score || null;
+  const isCustom = match.is_custom === true;
 
   return (
     <article className="card">
       <div className="match-top">
-        <span className="league">{match.tournament || 'League'}</span>
+        <span className="league">
+          {isCustom && <span className="custom-tag">📌 Custom</span>}
+          {match.tournament || 'League'}
+        </span>
         <span className="time">
           {new Date(match.date).toLocaleString('en-GB', {
             weekday: 'short',
@@ -64,55 +68,77 @@ function MatchCard({ match, isOpen, onToggle }) {
 
       <div className="pred-strip">
         <div className="pred-left">
-          <span className="pred-label">Predicted</span>
+          <span className="pred-label">
+            {isCustom ? 'Suggested' : 'Predicted'}
+          </span>
           <span className="pred-pick">{pick}</span>
         </div>
-        <div className="pred-score">
-          {String(score)
-            .replace('-', '–')
-            .split('')
-            .map((c, i) => (c === '–' ? <i key={i}>–</i> : c))}
-        </div>
-        <div className="pred-conf">
-          {pct(confidence)}%
-          <span className="conf-bar">
-            <i style={{ width: `${pct(confidence)}%` }} />
-          </span>
-        </div>
+
+        {score ? (
+          <div className="pred-score">
+            {String(score)
+              .replace('-', '–')
+              .split('')
+              .map((c, i) => (c === '–' ? <i key={i}>–</i> : c))}
+          </div>
+        ) : (
+          <div className="pred-score" style={{ fontSize: 13, opacity: 0.5 }}>
+            —
+          </div>
+        )}
+
+        {!isCustom && (
+          <div className="pred-conf">
+            {pct(confidence)}%
+            <span className="conf-bar">
+              <i style={{ width: `${pct(confidence)}%` }} />
+            </span>
+          </div>
+        )}
       </div>
 
-      {match.markets?.length > 0 && (
-        <div className="markets">
-          {match.markets.map((m, i) => (
-            <span className="mkt" key={i}>
-              {m.key} <b>{m.value}</b>
-            </span>
-          ))}
+      {isCustom ? (
+        <div className="custom-notice">
+          ⚠️{' '}
+          {match.custom_notice ||
+            'This league is not covered by our main data feed — prediction is a manual market suggestion.'}
         </div>
-      )}
-
-      {match.reasons?.length > 0 && (
+      ) : (
         <>
-          <button
-            className={`why-toggle ${isOpen ? 'open' : ''}`}
-            onClick={onToggle}
-          >
-            Why this pick ({match.reasons.length})
-            <span className="chev">▾</span>
-          </button>
-          {isOpen && (
-            <div className="why">
-              {match.reasons.map((r, i) => (
-                <div className="reason" data-tone={r.tone} key={i}>
-                  <span className="reason-w">
-                    {Math.round((r.weight || 0) * 100)}
-                  </span>
-                  <span className="reason-tag">{r.tag}</span>
-                  <p className="reason-title">{r.title}</p>
-                  <p className="reason-text">{r.text}</p>
-                </div>
+          {match.markets?.length > 0 && (
+            <div className="markets">
+              {match.markets.map((m, i) => (
+                <span className="mkt" key={i}>
+                  {m.key} <b>{m.value}</b>
+                </span>
               ))}
             </div>
+          )}
+
+          {match.reasons?.length > 0 && (
+            <>
+              <button
+                className={`why-toggle ${isOpen ? 'open' : ''}`}
+                onClick={onToggle}
+              >
+                Why this pick ({match.reasons.length})
+                <span className="chev">▾</span>
+              </button>
+              {isOpen && (
+                <div className="why">
+                  {match.reasons.map((r, i) => (
+                    <div className="reason" data-tone={r.tone} key={i}>
+                      <span className="reason-w">
+                        {Math.round((r.weight || 0) * 100)}
+                      </span>
+                      <span className="reason-tag">{r.tag}</span>
+                      <p className="reason-title">{r.title}</p>
+                      <p className="reason-text">{r.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </>
       )}
@@ -129,12 +155,10 @@ export default function Matches() {
   const [loading, setLoading] = useState(true);
   const [openSet, setOpenSet] = useState(new Set());
 
-  // Load leagues once
   useEffect(() => {
     matchApi.leagues().then(setLeagues).catch(() => {});
   }, []);
 
-  // Fetch matches whenever day / customDate / league changes
   useEffect(() => {
     setLoading(true);
     let targetDate;
@@ -161,8 +185,6 @@ export default function Matches() {
     });
   };
 
-  const today = new Date().toISOString().slice(0, 10);
-
   const cards = useMemo(() => {
     return matches.map((m, idx) => {
       const el = (
@@ -187,7 +209,7 @@ export default function Matches() {
 
   return (
     <div className="screen">
-      {/* Custom date picker row */}
+      {/* Custom date picker */}
       <div className="date-custom">
         <label htmlFor="datePicker">
           <svg
@@ -230,14 +252,12 @@ export default function Matches() {
         )}
       </div>
 
-      {/* Active date pill (shown when custom date is chosen) */}
       {customDate && (
         <div className="date-active-pill">
           📅 Showing {prettyDate(customDate)}
         </div>
       )}
 
-      {/* Quick 7-day strip (disabled highlight if custom date is active) */}
       {!customDate && (
         <div className="datestrip">
           {[0, 1, 2, 3, 4, 5, 6].map((off) => {
@@ -259,7 +279,6 @@ export default function Matches() {
         </div>
       )}
 
-      {/* League chips */}
       <div className="chips">
         {leagues.map((lg) => (
           <button
