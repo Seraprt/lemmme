@@ -106,16 +106,6 @@ function MatchCard({ match, isOpen, onToggle }) {
         </div>
       ) : (
         <>
-          {match.markets?.length > 0 && (
-            <div className="markets">
-              {match.markets.map((m, i) => (
-                <span className="mkt" key={i}>
-                  {m.key} <b>{m.value}</b>
-                </span>
-              ))}
-            </div>
-          )}
-
           {match.secondary_pick && (
             <div className="secondary-pick">
               <span className="secondary-label">Also consider:</span>
@@ -220,7 +210,6 @@ export default function Matches() {
 
   return (
     <div className="screen">
-      {/* Custom date picker */}
       <div className="date-custom">
         <label htmlFor="datePicker">
           <svg

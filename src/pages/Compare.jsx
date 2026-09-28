@@ -27,12 +27,11 @@ function barRow(label, v1, v2) {
 export default function Compare({ prefill, clearPrefill }) {
   const [home, setHome] = useState(null);
   const [away, setAway] = useState(null);
-  const [sheetFor, setSheetFor] = useState(null); // 'home' | 'away' | null
+  const [sheetFor, setSheetFor] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Prefill from Team Detail's "Compare with another" button
   useEffect(() => {
     if (prefill) {
       setHome(prefill);
@@ -183,35 +182,6 @@ export default function Compare({ prefill, clearPrefill }) {
                 {(result.secondary_pick.probability * 100).toFixed(0)}%)
               </span>
             </div>
-          )}
-
-          {result.markets?.length > 0 && (
-            <>
-              <div className="sec-head">
-                <h2>Markets</h2>
-                <span>model generated</span>
-              </div>
-              <div
-                className="list"
-                style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}
-              >
-                {result.markets.map((m, i) => (
-                  <span
-                    className="mkt"
-                    key={i}
-                    style={{ fontSize: 12, padding: '6px 11px' }}
-                  >
-                    {m.key} <b>{m.value}</b>
-                  </span>
-                ))}
-                <span
-                  className="mkt"
-                  style={{ fontSize: 12, padding: '6px 11px' }}
-                >
-                  Score <b>{result.predicted_correct_score}</b>
-                </span>
-              </div>
-            </>
           )}
 
           <div className="sec-head">
