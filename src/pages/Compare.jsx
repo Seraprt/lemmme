@@ -27,11 +27,12 @@ function barRow(label, v1, v2) {
 export default function Compare({ prefill, clearPrefill }) {
   const [home, setHome] = useState(null);
   const [away, setAway] = useState(null);
-  const [sheetFor, setSheetFor] = useState(null);
+  const [sheetFor, setSheetFor] = useState(null); // 'home' | 'away' | null
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Prefill from Team Detail's "Compare with another" button
   useEffect(() => {
     if (prefill) {
       setHome(prefill);
@@ -50,10 +51,7 @@ export default function Compare({ prefill, clearPrefill }) {
     try {
       const res = await predictionApi.compare(home.id, away.id);
 
-      // 🔒 Guard: backend may return { error: "..." }
-      if (res?.error) {
-        throw new Error(res.error);
-      }
+      if (res?.error) throw new Error(res.error);
       if (!res?.home_team || !res?.away_team) {
         throw new Error('Malformed response from server');
       }
@@ -151,7 +149,9 @@ export default function Compare({ prefill, clearPrefill }) {
         <>
           <div className="verdict">
             <p className="verdict-eyebrow">Model verdict</p>
-            <p className="verdict-winner">{result.pick || result.winner || '—'}</p>
+            <p className="verdict-winner">
+              {result.pick || result.winner || '—'}
+            </p>
             <p className="verdict-score">
               {String(result.predicted_correct_score || '0-0')
                 .split('-')
@@ -174,6 +174,16 @@ export default function Compare({ prefill, clearPrefill }) {
               Confidence {pct(result.confidence)}%
             </p>
           </div>
+
+          {result.secondary_pick && (
+            <div className="secondary-pick" style={{ margin: '12px 16px 0' }}>
+              <span className="secondary-label">Also consider:</span>
+              <span className="secondary-value">
+                {result.secondary_pick.label} (
+                {(result.secondary_pick.probability * 100).toFixed(0)}%)
+              </span>
+            </div>
+          )}
 
           {result.markets?.length > 0 && (
             <>
@@ -210,7 +220,10 @@ export default function Compare({ prefill, clearPrefill }) {
               {result.home_team.short} vs {result.away_team.short}
             </span>
           </div>
-          <div className="card" style={{ margin: '0 16px', padding: '6px 16px' }}>
+          <div
+            className="card"
+            style={{ margin: '0 16px', padding: '6px 16px' }}
+          >
             {barRow(
               'Attack',
               (result.home_team.attack_rating ?? 1) / 2.5,
@@ -241,7 +254,11 @@ export default function Compare({ prefill, clearPrefill }) {
               </div>
               <div className="list">
                 {result.reasons.map((r, i) => (
-                  <div className="card" key={i} style={{ padding: '13px 14px' }}>
+                  <div
+                    className="card"
+                    key={i}
+                    style={{ padding: '13px 14px' }}
+                  >
                     <div
                       className="reason"
                       data-tone={r.tone}
