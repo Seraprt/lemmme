@@ -3,12 +3,14 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  base: '/', 
   server: {
     port: 5173,
     host: true,
     allowedHosts: [
       'sahmee.onrender.com',
-      '.lemmme.onrender.com',   // allows any *.onrender.com subdomain
+      '.lemmme.onrender.com', 
+      'www.formline.com.ng',  // allows any *.onrender.com subdomain
       'localhost',
     ],
   },
