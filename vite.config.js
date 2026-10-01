@@ -8,7 +8,7 @@ export default defineConfig({
     host: true,
     allowedHosts: [
       'sahmee.onrender.com',
-      '.onrender.com',   // allows any *.onrender.com subdomain
+      '.lemmme.onrender.com',   // allows any *.onrender.com subdomain
       'localhost',
     ],
   },
