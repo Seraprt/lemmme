@@ -55,6 +55,10 @@ export const matchApi = {
 
 // ───── Predictions ─────
 export const predictionApi = {
-  compare: (homeId, awayId) =>
-    api(`/predictions/compare?home_id=${homeId}&away_id=${awayId}`),
+  compare: (homeId, awayId, neutral = false) =>
+    api(
+      `/predictions/compare?home_id=${homeId}&away_id=${awayId}&neutral=${
+        neutral ? 'true' : 'false'
+      }`
+    ),
 };

@@ -31,6 +31,7 @@ export default function Compare({ prefill, clearPrefill }) {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [neutral, setNeutral] = useState(false);
 
   useEffect(() => {
     if (prefill) {
@@ -48,7 +49,7 @@ export default function Compare({ prefill, clearPrefill }) {
     setError('');
     setResult(null);
     try {
-      const res = await predictionApi.compare(home.id, away.id);
+      const res = await predictionApi.compare(home.id, away.id, neutral);
 
       if (res?.error) throw new Error(res.error);
       if (!res?.home_team || !res?.away_team) {
@@ -88,7 +89,9 @@ export default function Compare({ prefill, clearPrefill }) {
           className={`slot ${home ? 'filled' : ''}`}
           onClick={() => setSheetFor('home')}
         >
-          <span className="slot-tag">Home</span>
+          <span className="slot-tag">
+            {neutral ? 'Team A' : 'Home'}
+          </span>
           {home ? (
             <>
               <Crest team={home} />
@@ -118,7 +121,9 @@ export default function Compare({ prefill, clearPrefill }) {
           className={`slot ${away ? 'filled' : ''}`}
           onClick={() => setSheetFor('away')}
         >
-          <span className="slot-tag">Away</span>
+          <span className="slot-tag">
+            {neutral ? 'Team B' : 'Away'}
+          </span>
           {away ? (
             <>
               <Crest team={away} />
@@ -129,6 +134,19 @@ export default function Compare({ prefill, clearPrefill }) {
           )}
         </button>
       </div>
+
+      {/* Neutral venue toggle */}
+      <label className="neutral-toggle">
+        <input
+          type="checkbox"
+          checked={neutral}
+          onChange={(e) => {
+            setNeutral(e.target.checked);
+            setResult(null);
+          }}
+        />
+        <span>Neutral venue (ignore home advantage)</span>
+      </label>
 
       <button
         className="btn-primary"
@@ -147,7 +165,9 @@ export default function Compare({ prefill, clearPrefill }) {
       {result && result.home_team && result.away_team && (
         <>
           <div className="verdict">
-            <p className="verdict-eyebrow">Model verdict</p>
+            <p className="verdict-eyebrow">
+              {result.neutral ? 'Model verdict · Neutral venue' : 'Model verdict'}
+            </p>
             <p className="verdict-winner">
               {result.pick || result.winner || '—'}
             </p>
@@ -204,15 +224,19 @@ export default function Compare({ prefill, clearPrefill }) {
               (result.home_team.defence_rating ?? 1) / 2.5,
               (result.away_team.defence_rating ?? 1) / 2.5
             )}
-            {barRow(
-              'Home',
-              (result.home_team.home_ppg ?? 1.5) / 3,
-              (result.away_team.home_ppg ?? 1.5) / 3
-            )}
-            {barRow(
-              'Away',
-              (result.home_team.away_ppg ?? 1) / 3,
-              (result.away_team.away_ppg ?? 1) / 3
+            {!result.neutral && (
+              <>
+                {barRow(
+                  'Home',
+                  (result.home_team.home_ppg ?? 1.5) / 3,
+                  (result.away_team.home_ppg ?? 1.5) / 3
+                )}
+                {barRow(
+                  'Away',
+                  (result.home_team.away_ppg ?? 1) / 3,
+                  (result.away_team.away_ppg ?? 1) / 3
+                )}
+              </>
             )}
           </div>
 

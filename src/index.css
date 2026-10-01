@@ -847,3 +847,33 @@ a { color: inherit; text-decoration: none; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ══════════════════════════════════════════════
+   NEUTRAL VENUE TOGGLE
+   ══════════════════════════════════════════════ */
+.neutral-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 16px 0;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  transition: 0.15s;
+}
+.neutral-toggle:hover {
+  border-color: #3a4552;
+  color: var(--text);
+}
+.neutral-toggle input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
