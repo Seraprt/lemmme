@@ -99,7 +99,7 @@ function MatchCard({ match, isOpen, onToggle }) {
 
       {isCustom ? (
         <div className="custom-notice">
-          ⚠️{' '}
+          🔴🟢🔵{' '}
           {match.custom_notice ||
             'Daily picks for you.'}
         </div>

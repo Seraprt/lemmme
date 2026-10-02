@@ -72,7 +72,7 @@ export default function Profile({ onBack }) {
         <h1>{user.username}</h1>
         <p>{user.email}</p>
         <span className="profile-provider">
-          {user.provider === 'google' ? '🔗 Signed in with Google' : '🔒 Signed in with email'}
+          {user.provider === 'google' ? ' Signed in with Google' : ' Signed in with email'}
         </span>
       </div>
 
@@ -132,7 +132,7 @@ export default function Profile({ onBack }) {
           }}
           onClick={logout}
         >
-          🚪 Sign out
+           Sign out
         </button>
       </div>
     </div>
