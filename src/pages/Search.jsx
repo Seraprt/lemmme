@@ -1,14 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import Crest from '../components/Crest';
 import { teamApi } from '../api';
-import { BannerAd } from '../components/AdSlot';
+
+const HOT_TEAMS = [
+  'Real Madrid',
+  'Barcelona',
+  'Manchester United',
+  'Chelsea',
+  'Arsenal',
+];
 
 export default function Search({ onOpenTeam }) {
   const [query, setQuery] = useState('');
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hotTeams, setHotTeams] = useState([]);
 
-  // initial broad load
+  // Load hot teams on mount
+  useEffect(() => {
+    (async () => {
+      const results = [];
+      for (const name of HOT_TEAMS) {
+        try {
+          const list = await teamApi.search(name);
+          if (list?.length) results.push(list[0]);
+        } catch {
+          // ignore
+        }
+      }
+      setHotTeams(results);
+    })();
+  }, []);
+
+  // Initial broad load
   useEffect(() => {
     setLoading(true);
     teamApi
@@ -18,7 +42,7 @@ export default function Search({ onOpenTeam }) {
       .finally(() => setLoading(false));
   }, []);
 
-  // live search
+  // Live search
   useEffect(() => {
     if (query.trim().length < 2) return;
     const t = setTimeout(() => {
@@ -48,19 +72,40 @@ export default function Search({ onOpenTeam }) {
         />
       </div>
 
+      {/* Hot searched — only when no search query */}
+      {!query && hotTeams.length > 0 && (
+        <>
+          <div className="sec-head">
+            <h2>🔥 Trending</h2>
+            <span>Most viewed</span>
+          </div>
+          <div className="hot-teams-grid">
+            {hotTeams.map((t) => (
+              <button
+                key={t.id}
+                className="hot-team-card"
+                onClick={() => onOpenTeam(t.id)}
+              >
+                <Crest team={t} />
+                <span className="hot-team-name">{t.name}</span>
+                <span className="hot-team-league">{t.league || '—'}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
       {loading && teams.length === 0 && (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--dim)', fontSize: 13 }}>
           Loading…
         </div>
       )}
 
-      {!loading && teams.length === 0 && (
+      {!loading && query && teams.length === 0 && (
         <div style={{ padding: 60, textAlign: 'center', color: 'var(--dim)', fontSize: 13 }}>
           No club found.
         </div>
       )}
-
-      <BannerAd height={80} label="Banner Ad" />
 
       {Object.entries(grouped).map(([lg, list]) => (
         <div key={lg}>
@@ -78,8 +123,6 @@ export default function Search({ onOpenTeam }) {
           ))}
         </div>
       ))}
-
-      <BannerAd height={90} label="Banner Ad" />
     </div>
   );
 }

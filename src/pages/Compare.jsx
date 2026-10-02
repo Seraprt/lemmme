@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import Crest from '../components/Crest';
 import TeamPickerSheet from '../components/TeamPickerSheet';
-import { predictionApi } from '../api';
+import { predictionApi, teamApi } from '../api';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
-function barRow(label, v1, v2) {
+// Invert defence rating for display — lower rating = better defence
+function defenceBar(rating) {
+  return Math.max(0, Math.min(100, Math.round(((2.5 - (rating || 1)) / 2.2) * 100)));
+}
+
+function attackBar(rating) {
+  return Math.min(100, Math.round(((rating || 1) / 2.5) * 100));
+}
+
+function barRow(label, v1, v2, hint) {
   const p1 = Math.min(100, pct(v1));
   const p2 = Math.min(100, pct(v2));
   return (
@@ -14,13 +23,38 @@ function barRow(label, v1, v2) {
       <div className="bar-track left">
         <i style={{ width: `${p1}%` }} />
       </div>
-      <span className="bar-name">{label}</span>
+      <span className="bar-name">
+        {label}
+        {hint && <span className="bar-hint">{hint}</span>}
+      </span>
       <div className="bar-track">
         <i style={{ width: `${p2}%` }} />
       </div>
       <span className="bar-num right">{p2}</span>
     </div>
   );
+}
+
+const SUGGESTED_MATCHUPS = [
+  { home: 'Manchester City', away: 'Barcelona' },
+  { home: 'Chelsea', away: 'Manchester United' },
+  { home: 'Real Madrid', away: 'Barcelona' },
+  { home: 'Real Madrid', away: 'Atletico Madrid' },
+  { home: 'Wolverhampton', away: 'Sporting Braga' },
+  { home: 'Fulham', away: 'Real Betis' },
+];
+
+async function findTeamByName(name) {
+  try {
+    const teams = await teamApi.search(name);
+    if (!teams?.length) return null;
+    // Best match: prefers exact-ish name
+    const lower = name.toLowerCase();
+    const exact = teams.find((t) => t.name.toLowerCase() === lower);
+    return exact || teams[0];
+  } catch {
+    return null;
+  }
 }
 
 export default function Compare({ prefill, clearPrefill }) {
@@ -31,6 +65,7 @@ export default function Compare({ prefill, clearPrefill }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [neutral, setNeutral] = useState(false);
+  const [loadingSuggestion, setLoadingSuggestion] = useState(null);
 
   useEffect(() => {
     if (prefill) {
@@ -76,6 +111,27 @@ export default function Compare({ prefill, clearPrefill }) {
     setResult(null);
   }
 
+  async function trySuggestion(pair) {
+    const key = `${pair.home}-${pair.away}`;
+    setLoadingSuggestion(key);
+    try {
+      const [h, a] = await Promise.all([
+        findTeamByName(pair.home),
+        findTeamByName(pair.away),
+      ]);
+      if (h && a) {
+        setHome(h);
+        setAway(a);
+        setResult(null);
+        setError('');
+      } else {
+        setError(`Couldn't find ${pair.home} or ${pair.away} in the database`);
+      }
+    } finally {
+      setLoadingSuggestion(null);
+    }
+  }
+
   return (
     <div className="screen">
       <div className="sec-head">
@@ -100,16 +156,7 @@ export default function Compare({ prefill, clearPrefill }) {
         </button>
 
         <button className="swap" onClick={swap} title="Swap">
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7 4 3 8l4 4M3 8h13M17 20l4-4-4-4M21 16H8" />
           </svg>
         </button>
@@ -154,6 +201,35 @@ export default function Compare({ prefill, clearPrefill }) {
         <div className="error-box" style={{ margin: '14px 16px 0' }}>
           {error}
         </div>
+      )}
+
+      {/* Suggested matchups — only when no result shown */}
+      {!result && (
+        <>
+          <div className="sec-head">
+            <h2>Try these matchups</h2>
+            <span>Quick compare</span>
+          </div>
+          <div className="suggested-list">
+            {SUGGESTED_MATCHUPS.map((pair) => {
+              const key = `${pair.home}-${pair.away}`;
+              const isLoading = loadingSuggestion === key;
+              return (
+                <button
+                  key={key}
+                  className="suggested-item"
+                  onClick={() => trySuggestion(pair)}
+                  disabled={isLoading}
+                >
+                  <span className="suggested-team">{pair.home}</span>
+                  <span className="suggested-vs">vs</span>
+                  <span className="suggested-team">{pair.away}</span>
+                  {isLoading && <span className="suggested-loading">…</span>}
+                </button>
+              );
+            })}
+          </div>
+        </>
       )}
 
       {result && result.home_team && result.away_team && (
@@ -207,13 +283,15 @@ export default function Compare({ prefill, clearPrefill }) {
           <div className="card" style={{ margin: '0 16px', padding: '6px 16px' }}>
             {barRow(
               'Attack',
-              (result.home_team.attack_rating ?? 1) / 2.5,
-              (result.away_team.attack_rating ?? 1) / 2.5
+              attackBar(result.home_team.attack_rating),
+              attackBar(result.away_team.attack_rating),
+              'higher = better'
             )}
             {barRow(
               'Defence',
-              (result.home_team.defence_rating ?? 1) / 2.5,
-              (result.away_team.defence_rating ?? 1) / 2.5
+              defenceBar(result.home_team.defence_rating),
+              defenceBar(result.away_team.defence_rating),
+              'higher = better'
             )}
             {!result.neutral && (
               <>
@@ -254,7 +332,19 @@ export default function Compare({ prefill, clearPrefill }) {
             </>
           )}
 
-          <div style={{ height: 20 }} />
+          <div style={{ padding: '0 16px 30px' }}>
+            <button
+              className="filter-btn"
+              style={{ width: '100%', justifyContent: 'center' }}
+              onClick={() => {
+                setResult(null);
+                setHome(null);
+                setAway(null);
+              }}
+            >
+              Compare another pair
+            </button>
+          </div>
         </>
       )}
 

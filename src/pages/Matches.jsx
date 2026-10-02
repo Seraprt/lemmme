@@ -45,7 +45,7 @@ function MatchCard({ match, isOpen, onToggle }) {
     <article className="card">
       <div className="match-top">
         <span className="league">
-          {isCustom && <span className="custom-tag">📌 Custom</span>}
+          {isCustom && <span className="custom-tag"> Custom</span>}
           {match.tournament || 'League'}
         </span>
         <span className="time">
@@ -101,7 +101,7 @@ function MatchCard({ match, isOpen, onToggle }) {
         <div className="custom-notice">
           ⚠️{' '}
           {match.custom_notice ||
-            'This league is not covered by our main data feed — prediction is a manual market suggestion.'}
+            'Daily picks for you.'}
         </div>
       ) : (
         <>

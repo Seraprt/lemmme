@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const { loginWithEmail, signupWithEmail, loginWithGoogle } = useAuth();
-  const [mode, setMode] = useState('login'); // 'login' | 'signup'
+  const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -50,7 +50,7 @@ export default function Login() {
             <circle cx="11" cy="33" r="3" fill="#5AA9FF" />
           </svg>
           <h1>Formline</h1>
-          <p>Match analysis, correct scores and team strength — built on our own model.</p>
+          <p>The smarter way to read a football match — predictions, correct scores and team strength, all in one place.</p>
         </div>
 
         <button className="btn-google" onClick={handleGoogle} disabled={busy}>
@@ -93,7 +93,7 @@ export default function Login() {
             <label>{mode === 'login' ? 'Email or username' : 'Email'}</label>
             <input
               type="text"
-              placeholder={mode === 'login' ? 'you@example.com' : 'you@example.com'}
+              placeholder="you@example.com"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
@@ -125,9 +125,26 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="login-note">
-          No password reset. Sessions don't expire — <b>you stay signed in</b> until you clear the app data on your device.
-        </p>
+        {/* Social reach — placeholders */}
+        <div className="login-socials">
+          <p className="login-socials-title">Follow our football insights</p>
+          <div className="login-socials-row">
+            <a href="#" className="social-link" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="2" width="20" height="20" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="18" cy="6" r="1" fill="currentColor" stroke="none" />
+              </svg>
+              Instagram
+            </a>
+            <a href="#" className="social-link" aria-label="TikTok">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 8.5a6.5 6.5 0 0 1-5-2.5v9.5A5 5 0 1 1 10 10.5v3a2 2 0 1 0 2 2V3h3a5.5 5.5 0 0 0 5 5.5v3z" />
+              </svg>
+              TikTok
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

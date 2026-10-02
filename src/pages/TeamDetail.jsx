@@ -4,6 +4,7 @@ import { teamApi } from '../api';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
+// ── Strength reads ──
 function readHome(v) {
   if (v < 0.4) return { tone: 'bad', label: 'Weak at home', text: 'They give up their home advantage.' };
   if (v < 0.6) return { tone: 'warn', label: 'Average', text: 'A normal home record. No major edge.' };
@@ -27,6 +28,7 @@ function readAttack(v) {
 }
 
 function readDefence(v) {
+  // LOWER defence_rating = BETTER defence
   if (v <= 0.7) return { tone: 'good', label: 'Elite defence', note: 'Concedes far less than league average — hard to break down.' };
   if (v <= 0.9) return { tone: 'good', label: 'Strong defence', note: 'Concedes less than average — a reliable back line.' };
   if (v <= 1.1) return { tone: 'ok', label: 'Average defence', note: 'Concedes roughly league average.' };
@@ -135,6 +137,7 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </div>
       )}
 
+      {/* ── NEXT MATCH ── */}
       {team.next_match && team.next_match.opponent && (
         <>
           <div className="sec-head">
@@ -166,6 +169,7 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </>
       )}
 
+      {/* ── RECENT RESULTS ── */}
       {team.recent_matches?.length > 0 && (
         <>
           <div className="sec-head">
@@ -177,20 +181,33 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
               <div className="recent-item" key={i}>
                 <span className={`recent-pill ${m.result}`}>{m.result}</span>
                 <div className="recent-teams">
-                  <div className="recent-row">
-                    <span className="recent-side-label">{m.was_home ? 'H' : 'A'}</span>
-                    <span className="recent-opp">
-                      {m.was_home ? team.name : m.opponent?.name}
-                    </span>
-                    <span className="recent-score">{m.goals_for}</span>
-                  </div>
-                  <div className="recent-row">
-                    <span className="recent-side-label">{m.was_home ? 'A' : 'H'}</span>
-                    <span className="recent-opp">
-                      {m.was_home ? m.opponent?.name : team.name}
-                    </span>
-                    <span className="recent-score">{m.goals_against}</span>
-                  </div>
+                  {m.was_home ? (
+                    <>
+                      <div className="recent-row">
+                        <span className="recent-side-label">H</span>
+                        <span className="recent-opp">{team.name}</span>
+                        <span className="recent-score">{m.goals_for}</span>
+                      </div>
+                      <div className="recent-row">
+                        <span className="recent-side-label">A</span>
+                        <span className="recent-opp">{m.opponent?.name}</span>
+                        <span className="recent-score">{m.goals_against}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="recent-row">
+                        <span className="recent-side-label">H</span>
+                        <span className="recent-opp">{m.opponent?.name}</span>
+                        <span className="recent-score">{m.goals_against}</span>
+                      </div>
+                      <div className="recent-row">
+                        <span className="recent-side-label">A</span>
+                        <span className="recent-opp">{team.name}</span>
+                        <span className="recent-score">{m.goals_for}</span>
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className="recent-meta">
                   <span className="recent-date">{formatDate(m.date)}</span>
@@ -209,6 +226,7 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         <span>0 – 100 scale</span>
       </div>
 
+      {/* Attack */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Attack</span>
@@ -224,10 +242,12 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
           <span className={`tagline ${attackRead.tone}`}>{attackRead.label}</span>
         </div>
         <p className="meter-note">
-          Goals scored relative to league average. 1.00× = league average. {attackRead.note}
+          Goals scored relative to league average. 1.00× = league average.{' '}
+          {attackRead.note}
         </p>
       </div>
 
+      {/* Defence */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Defence</span>
@@ -243,10 +263,12 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
           <span className={`tagline ${defenceRead.tone}`}>{defenceRead.label}</span>
         </div>
         <p className="meter-note">
-          Goals conceded relative to league average. Lower is better — the bar is inverted so higher = stronger defence. {defenceRead.note}
+          Goals conceded relative to league average. Lower ratio = stronger defence.
+          The bar is inverted so higher = better. {defenceRead.note}
         </p>
       </div>
 
+      {/* Home */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Home strength</span>
@@ -258,13 +280,18 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
             style={{
               width: `${homePct}%`,
               background:
-                homeRead.tone === 'bad' ? '#FF6161' : homeRead.tone === 'warn' ? '#FFB020' : '#3ED598',
+                homeRead.tone === 'bad'
+                  ? '#FF6161'
+                  : homeRead.tone === 'warn'
+                  ? '#FFB020'
+                  : '#3ED598',
             }}
           />
         </div>
         <p className="meter-note">{homeRead.text}</p>
       </div>
 
+      {/* Away */}
       <div className="meter" style={{ borderBottom: 0 }}>
         <div className="meter-top">
           <span className="meter-name">Away strength</span>
@@ -276,7 +303,11 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
             style={{
               width: `${awayPct}%`,
               background:
-                awayRead.tone === 'bad' ? '#FF6161' : awayRead.tone === 'warn' ? '#FFB020' : '#3ED598',
+                awayRead.tone === 'bad'
+                  ? '#FF6161'
+                  : awayRead.tone === 'warn'
+                  ? '#FFB020'
+                  : '#3ED598',
             }}
           />
         </div>
