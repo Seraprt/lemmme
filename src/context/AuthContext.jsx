@@ -16,17 +16,20 @@ export function AuthProvider({ children }) {
     setUser(u);
   }
 
-  // On mount: 1) check redirect result  2) check stored token
+  // On mount: 1) check Google redirect result  2) check stored token
   useEffect(() => {
     let cancelled = false;
 
     async function boot() {
-      // 1. If we just came back from a Google redirect, exchange it
+      // 1. If we just came back from Google redirect, exchange it
       try {
         const idToken = await getGoogleRedirectResult();
         if (idToken) {
           const res = await authApi.googleLogin(idToken);
-          if (!cancelled) persist(res.token, res.user);
+          if (!cancelled) {
+            persist(res.token, res.user);
+            setLoading(false);
+          }
           return;
         }
       } catch (err) {
@@ -52,7 +55,9 @@ export function AuthProvider({ children }) {
     }
 
     boot();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function loginWithEmail(identifier, password) {
@@ -68,12 +73,10 @@ export function AuthProvider({ children }) {
   }
 
   async function loginWithGoogle() {
-    const idToken = await firebaseGoogleSignIn();
-    // If we got here on mobile, page is reloading — nothing else to do
-    if (!idToken) return null;
-    const res = await authApi.googleLogin(idToken);
-    persist(res.token, res.user);
-    return res;
+    // Just kick off the redirect. Page navigates away.
+    // When user comes back, `getGoogleRedirectResult()` finishes the job.
+    await firebaseGoogleSignIn();
+    return null;
   }
 
   function logout() {
