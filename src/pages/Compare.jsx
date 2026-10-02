@@ -5,13 +5,13 @@ import { predictionApi, teamApi } from '../api';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
-// Invert defence rating for display — lower rating = better defence
+// Return 0-1 so barRow handles the percentage
 function defenceBar(rating) {
-  return Math.max(0, Math.min(100, Math.round(((2.5 - (rating || 1)) / 2.2) * 100)));
+  return Math.max(0, Math.min(1, (2.5 - (rating || 1)) / 2.2));
 }
 
 function attackBar(rating) {
-  return Math.min(100, Math.round(((rating || 1) / 2.5) * 100));
+  return Math.max(0, Math.min(1, (rating || 1) / 2.5));
 }
 
 function barRow(label, v1, v2, hint) {
@@ -48,7 +48,6 @@ async function findTeamByName(name) {
   try {
     const teams = await teamApi.search(name);
     if (!teams?.length) return null;
-    // Best match: prefers exact-ish name
     const lower = name.toLowerCase();
     const exact = teams.find((t) => t.name.toLowerCase() === lower);
     return exact || teams[0];
@@ -203,7 +202,6 @@ export default function Compare({ prefill, clearPrefill }) {
         </div>
       )}
 
-      {/* Suggested matchups — only when no result shown */}
       {!result && (
         <>
           <div className="sec-head">
