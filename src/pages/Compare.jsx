@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Crest from '../components/Crest';
 import TeamPickerSheet from '../components/TeamPickerSheet';
 import { predictionApi } from '../api';
-import { BannerAd, Smartlink } from '../components/AdSlot';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
@@ -89,9 +88,7 @@ export default function Compare({ prefill, clearPrefill }) {
           className={`slot ${home ? 'filled' : ''}`}
           onClick={() => setSheetFor('home')}
         >
-          <span className="slot-tag">
-            {neutral ? 'Team A' : 'Home'}
-          </span>
+          <span className="slot-tag">{neutral ? 'Team A' : 'Home'}</span>
           {home ? (
             <>
               <Crest team={home} />
@@ -121,9 +118,7 @@ export default function Compare({ prefill, clearPrefill }) {
           className={`slot ${away ? 'filled' : ''}`}
           onClick={() => setSheetFor('away')}
         >
-          <span className="slot-tag">
-            {neutral ? 'Team B' : 'Away'}
-          </span>
+          <span className="slot-tag">{neutral ? 'Team B' : 'Away'}</span>
           {away ? (
             <>
               <Crest team={away} />
@@ -135,7 +130,6 @@ export default function Compare({ prefill, clearPrefill }) {
         </button>
       </div>
 
-      {/* Neutral venue toggle */}
       <label className="neutral-toggle">
         <input
           type="checkbox"
@@ -210,10 +204,7 @@ export default function Compare({ prefill, clearPrefill }) {
               {result.home_team.short} vs {result.away_team.short}
             </span>
           </div>
-          <div
-            className="card"
-            style={{ margin: '0 16px', padding: '6px 16px' }}
-          >
+          <div className="card" style={{ margin: '0 16px', padding: '6px 16px' }}>
             {barRow(
               'Attack',
               (result.home_team.attack_rating ?? 1) / 2.5,
@@ -248,16 +239,8 @@ export default function Compare({ prefill, clearPrefill }) {
               </div>
               <div className="list">
                 {result.reasons.map((r, i) => (
-                  <div
-                    className="card"
-                    key={i}
-                    style={{ padding: '13px 14px' }}
-                  >
-                    <div
-                      className="reason"
-                      data-tone={r.tone}
-                      style={{ borderLeftWidth: 2 }}
-                    >
+                  <div className="card" key={i} style={{ padding: '13px 14px' }}>
+                    <div className="reason" data-tone={r.tone} style={{ borderLeftWidth: 2 }}>
                       <span className="reason-w">
                         {Math.round((r.weight || 0) * 100)}
                       </span>
@@ -271,8 +254,6 @@ export default function Compare({ prefill, clearPrefill }) {
             </>
           )}
 
-          <Smartlink text="Sponsored offer" />
-          <BannerAd height={90} label="Banner Ad" />
           <div style={{ height: 20 }} />
         </>
       )}

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { matchApi } from '../api';
 import Crest from '../components/Crest';
-import { BannerAd, Smartlink } from '../components/AdSlot';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
@@ -187,25 +186,14 @@ export default function Matches() {
   };
 
   const cards = useMemo(() => {
-    return matches.map((m, idx) => {
-      const el = (
-        <MatchCard
-          key={m.match_id}
-          match={m}
-          isOpen={openSet.has(m.match_id)}
-          onToggle={() => toggle(m.match_id)}
-        />
-      );
-      if (idx === 2 || idx === 5) {
-        return (
-          <React.Fragment key={`wrap-${m.match_id}`}>
-            {el}
-            <BannerAd height={100} label="Ad" />
-          </React.Fragment>
-        );
-      }
-      return el;
-    });
+    return matches.map((m) => (
+      <MatchCard
+        key={m.match_id}
+        match={m}
+        isOpen={openSet.has(m.match_id)}
+        onToggle={() => toggle(m.match_id)}
+      />
+    ));
   }, [matches, openSet]);
 
   return (
@@ -292,8 +280,6 @@ export default function Matches() {
         ))}
       </div>
 
-      <Smartlink text="Sponsored offer" />
-
       <div className="list">
         {loading && (
           <div
@@ -325,8 +311,6 @@ export default function Matches() {
 
         {!loading && cards}
       </div>
-
-      <BannerAd height={90} label="Banner Ad" />
     </div>
   );
 }

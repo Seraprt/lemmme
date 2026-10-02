@@ -1,70 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import Crest from '../components/Crest';
 import { teamApi } from '../api';
-import { BannerAd, Smartlink } from '../components/AdSlot';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
-// ── Strength reads ──
 function readHome(v) {
-  if (v < 0.4)
-    return { tone: 'bad', label: 'Weak at home', text: 'They give up their home advantage.' };
-  if (v < 0.6)
-    return { tone: 'warn', label: 'Average', text: 'A normal home record. No major edge.' };
-  if (v < 0.78)
-    return { tone: 'ok', label: 'Strong', text: 'They win most home games and score freely at home.' };
-  return {
-    tone: 'good',
-    label: 'Fortress',
-    text: 'A genuine fortress. Very few sides take points here.',
-  };
+  if (v < 0.4) return { tone: 'bad', label: 'Weak at home', text: 'They give up their home advantage.' };
+  if (v < 0.6) return { tone: 'warn', label: 'Average', text: 'A normal home record. No major edge.' };
+  if (v < 0.78) return { tone: 'ok', label: 'Strong', text: 'They win most home games and score freely at home.' };
+  return { tone: 'good', label: 'Fortress', text: 'A genuine fortress. Very few sides take points here.' };
 }
 
 function readAway(v) {
-  if (v < 0.3)
-    return {
-      tone: 'bad',
-      label: 'Poor traveller',
-      text: 'Below our 0.30 away line — they rarely get results on the road.',
-    };
-  if (v < 0.45)
-    return {
-      tone: 'warn',
-      label: 'Below average',
-      text: 'They travel worse than their league position suggests.',
-    };
-  if (v < 0.65)
-    return { tone: 'ok', label: 'Solid', text: 'A dependable away side that picks up points on the road.' };
-  return {
-    tone: 'good',
-    label: 'Elite away',
-    text: 'One of the best travelling records in the league.',
-  };
+  if (v < 0.3) return { tone: 'bad', label: 'Poor traveller', text: 'Below our 0.30 away line — they rarely get results on the road.' };
+  if (v < 0.45) return { tone: 'warn', label: 'Below average', text: 'They travel worse than their league position suggests.' };
+  if (v < 0.65) return { tone: 'ok', label: 'Solid', text: 'A dependable away side that picks up points on the road.' };
+  return { tone: 'good', label: 'Elite away', text: 'One of the best travelling records in the league.' };
 }
 
-// ── Attack / Defence reads (defence inverted — lower is better) ──
 function readAttack(v) {
-  if (v >= 1.5)
-    return { tone: 'good', label: 'Elite attack', note: 'Scores far above league average — a genuine goal threat.' };
-  if (v >= 1.2)
-    return { tone: 'good', label: 'Strong attack', note: 'Above average — regularly creates and converts chances.' };
-  if (v >= 0.9)
-    return { tone: 'ok', label: 'Average attack', note: 'Around league average for goals scored.' };
-  if (v >= 0.7)
-    return { tone: 'warn', label: 'Weak attack', note: 'Struggles to score — often relies on set pieces.' };
+  if (v >= 1.5) return { tone: 'good', label: 'Elite attack', note: 'Scores far above league average — a genuine goal threat.' };
+  if (v >= 1.2) return { tone: 'good', label: 'Strong attack', note: 'Above average — regularly creates and converts chances.' };
+  if (v >= 0.9) return { tone: 'ok', label: 'Average attack', note: 'Around league average for goals scored.' };
+  if (v >= 0.7) return { tone: 'warn', label: 'Weak attack', note: 'Struggles to score — often relies on set pieces.' };
   return { tone: 'bad', label: 'Very weak attack', note: 'Rarely scores — low attacking output across the season.' };
 }
 
 function readDefence(v) {
-  // LOWER defence_rating = BETTER defence
-  if (v <= 0.7)
-    return { tone: 'good', label: 'Elite defence', note: 'Concedes far less than league average — hard to break down.' };
-  if (v <= 0.9)
-    return { tone: 'good', label: 'Strong defence', note: 'Concedes less than average — a reliable back line.' };
-  if (v <= 1.1)
-    return { tone: 'ok', label: 'Average defence', note: 'Concedes roughly league average.' };
-  if (v <= 1.3)
-    return { tone: 'warn', label: 'Weak defence', note: 'Leaks goals — concedes above league average.' };
+  if (v <= 0.7) return { tone: 'good', label: 'Elite defence', note: 'Concedes far less than league average — hard to break down.' };
+  if (v <= 0.9) return { tone: 'good', label: 'Strong defence', note: 'Concedes less than average — a reliable back line.' };
+  if (v <= 1.1) return { tone: 'ok', label: 'Average defence', note: 'Concedes roughly league average.' };
+  if (v <= 1.3) return { tone: 'warn', label: 'Weak defence', note: 'Leaks goals — concedes above league average.' };
   return { tone: 'bad', label: 'Very weak defence', note: 'Very porous — concedes heavily and often.' };
 }
 
@@ -131,10 +97,7 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
   const attackRead = readAttack(team.attack_rating || 1.0);
   const defenceRead = readDefence(team.defence_rating || 1.0);
 
-  // Attack: higher is better. 0 → 0%, 2.5 → 100%
   const attackPct = Math.min(100, pct((team.attack_rating || 1.0) / 2.5));
-
-  // Defence: INVERT. rating 0.3 (elite) → 100%, rating 2.5 (weak) → 0%
   const defencePct = Math.max(
     0,
     Math.min(100, Math.round(((2.5 - (team.defence_rating || 1.0)) / 2.2) * 100))
@@ -172,7 +135,6 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </div>
       )}
 
-      {/* ── NEXT MATCH ── */}
       {team.next_match && team.next_match.opponent && (
         <>
           <div className="sec-head">
@@ -188,9 +150,7 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
             </div>
             <div className="next-match-mid">
               <span className="next-vs">VS</span>
-              <span className="next-time">
-                {formatDateTime(team.next_match.date)}
-              </span>
+              <span className="next-time">{formatDateTime(team.next_match.date)}</span>
               <span className="next-venue">
                 {team.next_match.was_home ? 'Home' : 'Away'}
               </span>
@@ -206,7 +166,6 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </>
       )}
 
-      {/* ── RECENT RESULTS ── */}
       {team.recent_matches?.length > 0 && (
         <>
           <div className="sec-head">
@@ -219,18 +178,14 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
                 <span className={`recent-pill ${m.result}`}>{m.result}</span>
                 <div className="recent-teams">
                   <div className="recent-row">
-                    <span className="recent-side-label">
-                      {m.was_home ? 'H' : 'A'}
-                    </span>
+                    <span className="recent-side-label">{m.was_home ? 'H' : 'A'}</span>
                     <span className="recent-opp">
                       {m.was_home ? team.name : m.opponent?.name}
                     </span>
                     <span className="recent-score">{m.goals_for}</span>
                   </div>
                   <div className="recent-row">
-                    <span className="recent-side-label">
-                      {m.was_home ? 'A' : 'H'}
-                    </span>
+                    <span className="recent-side-label">{m.was_home ? 'A' : 'H'}</span>
                     <span className="recent-opp">
                       {m.was_home ? m.opponent?.name : team.name}
                     </span>
@@ -254,7 +209,6 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         <span>0 – 100 scale</span>
       </div>
 
-      {/* Attack */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Attack</span>
@@ -270,12 +224,10 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
           <span className={`tagline ${attackRead.tone}`}>{attackRead.label}</span>
         </div>
         <p className="meter-note">
-          Goals scored relative to league average. 1.00× = league average.{' '}
-          {attackRead.note}
+          Goals scored relative to league average. 1.00× = league average. {attackRead.note}
         </p>
       </div>
 
-      {/* Defence */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Defence</span>
@@ -291,12 +243,10 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
           <span className={`tagline ${defenceRead.tone}`}>{defenceRead.label}</span>
         </div>
         <p className="meter-note">
-          Goals conceded relative to league average. Lower ratio = stronger defence.
-          The bar is inverted so higher = better. {defenceRead.note}
+          Goals conceded relative to league average. Lower is better — the bar is inverted so higher = stronger defence. {defenceRead.note}
         </p>
       </div>
 
-      {/* Home */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Home strength</span>
@@ -308,18 +258,13 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
             style={{
               width: `${homePct}%`,
               background:
-                homeRead.tone === 'bad'
-                  ? '#FF6161'
-                  : homeRead.tone === 'warn'
-                  ? '#FFB020'
-                  : '#3ED598',
+                homeRead.tone === 'bad' ? '#FF6161' : homeRead.tone === 'warn' ? '#FFB020' : '#3ED598',
             }}
           />
         </div>
         <p className="meter-note">{homeRead.text}</p>
       </div>
 
-      {/* Away */}
       <div className="meter" style={{ borderBottom: 0 }}>
         <div className="meter-top">
           <span className="meter-name">Away strength</span>
@@ -331,19 +276,12 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
             style={{
               width: `${awayPct}%`,
               background:
-                awayRead.tone === 'bad'
-                  ? '#FF6161'
-                  : awayRead.tone === 'warn'
-                  ? '#FFB020'
-                  : '#3ED598',
+                awayRead.tone === 'bad' ? '#FF6161' : awayRead.tone === 'warn' ? '#FFB020' : '#3ED598',
             }}
           />
         </div>
         <p className="meter-note">{awayRead.text}</p>
       </div>
-
-      <Smartlink text="Sponsored offer" />
-      <BannerAd height={90} label="Banner Ad" />
 
       <div style={{ padding: '20px 16px 28px' }}>
         <button

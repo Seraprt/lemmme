@@ -21,16 +21,20 @@
     <meta name="monetag" content="0b11a90bc542b296dc356a99ee1e9029" />
 
     <!-- ══════════════════════════════════════════════ -->
-    <!-- Monetag Ad Script (MultiTag)                  -->
-    <!-- Zone ID: 289493                               -->
-    <!-- Loads globally — do NOT put in React          -->
+    <!-- Monetag Ad Script (In-Page Push)              -->
+    <!-- Zone: 11938025 — Auto-injects, no placement   -->
     <!-- ══════════════════════════════════════════════ -->
-    <script
-      src="https://quge5.com/88/tag.min.js"
-      data-zone="289493"
-      async
-      data-cfasync="false"
-    ></script>
+    <script>
+      (function (s) {
+        s.dataset.zone = '11938025';
+        s.src = 'https://nap5k.com/tag.min.js';
+      })(
+        [document.documentElement, document.body]
+          .filter(Boolean)
+          .pop()
+          .appendChild(document.createElement('script'))
+      );
+    </script>
   </head>
   <body>
     <div id="root"></div>
