@@ -138,6 +138,13 @@ export default function Compare({ prefill, clearPrefill }) {
         <span>Head to head</span>
       </div>
 
+      {/* Current stats notice */}
+      <div className="compare-notice">
+        ℹ️ Predictions are based on each team's <strong>current stats</strong> — attack,
+        defence, form, and home/away strength. They don't account for injuries,
+        lineups, or last-minute news.
+      </div>
+
       <div className="picker">
         <button
           className={`slot ${home ? 'filled' : ''}`}
@@ -155,7 +162,16 @@ export default function Compare({ prefill, clearPrefill }) {
         </button>
 
         <button className="swap" onClick={swap} title="Swap">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M7 4 3 8l4 4M3 8h13M17 20l4-4-4-4M21 16H8" />
           </svg>
         </button>
@@ -316,7 +332,11 @@ export default function Compare({ prefill, clearPrefill }) {
               <div className="list">
                 {result.reasons.map((r, i) => (
                   <div className="card" key={i} style={{ padding: '13px 14px' }}>
-                    <div className="reason" data-tone={r.tone} style={{ borderLeftWidth: 2 }}>
+                    <div
+                      className="reason"
+                      data-tone={r.tone}
+                      style={{ borderLeftWidth: 2 }}
+                    >
                       <span className="reason-w">
                         {Math.round((r.weight || 0) * 100)}
                       </span>
