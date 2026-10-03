@@ -38,11 +38,11 @@ export default function Login() {
     setError('');
     setBusy(true);
     try {
-      // signInWithRedirect — page will navigate away to Google,
-      // then come back. No popup, so ad scripts can't block it.
+      console.log('Starting Google popup...');
       await loginWithGoogle();
-      // Do NOT setBusy(false) here — page is navigating away.
+      console.log('Google login finished successfully');
     } catch (err) {
+      console.error('Google login error:', err);
       setError(err.message || 'Google sign-in failed');
       setBusy(false);
     }
@@ -53,23 +53,8 @@ export default function Login() {
       <div className="login-inner">
         <div className="login-logo">
           <svg width="60" height="60" viewBox="0 0 48 48" fill="none">
-            <rect
-              x="1"
-              y="1"
-              width="46"
-              height="46"
-              rx="13"
-              fill="#11151C"
-              stroke="#2A323E"
-              strokeWidth="1.5"
-            />
-            <path
-              d="M11 33 L20 23.5 L26.5 28 L37 14"
-              stroke="#C8F751"
-              strokeWidth="3.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+            <rect x="1" y="1" width="46" height="46" rx="13" fill="#11151C" stroke="#2A323E" strokeWidth="1.5" />
+            <path d="M11 33 L20 23.5 L26.5 28 L37 14" stroke="#C8F751" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="37" cy="14" r="4" fill="#C8F751" />
             <circle cx="11" cy="33" r="3" fill="#5AA9FF" />
           </svg>
@@ -80,30 +65,14 @@ export default function Login() {
           </p>
         </div>
 
-        <button
-          className="btn-google"
-          onClick={handleGoogle}
-          disabled={busy}
-        >
+        <button className="btn-google" onClick={handleGoogle} disabled={busy}>
           <svg width="17" height="17" viewBox="0 0 48 48">
-            <path
-              fill="#EA4335"
-              d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.5 2.4 30.1 0 24 0 14.6 0 6.4 5.4 2.5 13.3l7.8 6.1C12.2 13.2 17.6 9.5 24 9.5z"
-            />
-            <path
-              fill="#4285F4"
-              d="M46.9 24.5c0-1.6-.1-3.2-.4-4.7H24v9h12.8c-.6 3-2.3 5.6-4.8 7.3l7.6 5.9c4.4-4.1 7.3-10.2 7.3-17.5z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M10.3 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7.8-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l7.8-6.1z"
-            />
-            <path
-              fill="#34A853"
-              d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.4 0-11.8-3.7-13.7-9.1l-7.8 6.1C6.4 42.6 14.6 48 24 48z"
-            />
+            <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.5 2.4 30.1 0 24 0 14.6 0 6.4 5.4 2.5 13.3l7.8 6.1C12.2 13.2 17.6 9.5 24 9.5z" />
+            <path fill="#4285F4" d="M46.9 24.5c0-1.6-.1-3.2-.4-4.7H24v9h12.8c-.6 3-2.3 5.6-4.8 7.3l7.6 5.9c4.4-4.1 7.3-10.2 7.3-17.5z" />
+            <path fill="#FBBC05" d="M10.3 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.8-4.6l-7.8-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l7.8-6.1z" />
+            <path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.4 0-11.8-3.7-13.7-9.1l-7.8 6.1C6.4 42.6 14.6 48 24 48z" />
           </svg>
-          {busy ? 'Redirecting…' : 'Continue with Google'}
+          {busy ? 'Signing in…' : 'Continue with Google'}
         </button>
 
         <div className="divider">or</div>
@@ -137,9 +106,7 @@ export default function Login() {
                 type="text"
                 placeholder="yourname"
                 value={form.username}
-                onChange={(e) =>
-                  setForm({ ...form, username: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
                 required
                 autoComplete="username"
               />
@@ -147,9 +114,7 @@ export default function Login() {
           )}
 
           <div className="field">
-            <label>
-              {mode === 'login' ? 'Email or username' : 'Email'}
-            </label>
+            <label>{mode === 'login' ? 'Email or username' : 'Email'}</label>
             <input
               type="text"
               placeholder="you@example.com"
@@ -166,13 +131,9 @@ export default function Login() {
               type="password"
               placeholder="••••••••"
               value={form.password}
-              onChange={(e) =>
-                setForm({ ...form, password: e.target.value })
-              }
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
-              autoComplete={
-                mode === 'login' ? 'current-password' : 'new-password'
-              }
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             />
           </div>
 
@@ -184,46 +145,23 @@ export default function Login() {
             style={{ width: '100%', margin: '14px 0 0' }}
             disabled={busy}
           >
-            {busy
-              ? 'Please wait…'
-              : mode === 'login'
-              ? 'Sign in'
-              : 'Create account'}
+            {busy ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
         </form>
 
-        {/* Social reach — placeholders */}
         <div className="login-socials">
           <p className="login-socials-title">Follow our football insights</p>
           <div className="login-socials-row">
             <a href="#" className="social-link" aria-label="Instagram">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="2" y="2" width="20" height="20" rx="5" />
                 <circle cx="12" cy="12" r="4" />
-                <circle
-                  cx="18"
-                  cy="6"
-                  r="1"
-                  fill="currentColor"
-                  stroke="none"
-                />
+                <circle cx="18" cy="6" r="1" fill="currentColor" stroke="none" />
               </svg>
               Instagram
             </a>
             <a href="#" className="social-link" aria-label="TikTok">
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20 8.5a6.5 6.5 0 0 1-5-2.5v9.5A5 5 0 1 1 10 10.5v3a2 2 0 1 0 2 2V3h3a5.5 5.5 0 0 0 5 5.5v3z" />
               </svg>
               TikTok

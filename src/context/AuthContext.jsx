@@ -16,15 +16,15 @@ export function AuthProvider({ children }) {
     setUser(u);
   }
 
-  // On mount: 1) check Google redirect result  2) check stored token
   useEffect(() => {
     let cancelled = false;
 
     async function boot() {
-      // 1. If we just came back from Google redirect, exchange it
+      // 1. Check Google redirect result (in case redirect was used)
       try {
         const idToken = await getGoogleRedirectResult();
         if (idToken) {
+          console.log('Got redirect token, exchanging with backend...');
           const res = await authApi.googleLogin(idToken);
           if (!cancelled) {
             persist(res.token, res.user);
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
         console.error('Google redirect exchange failed:', err);
       }
 
-      // 2. Otherwise check for stored token
+      // 2. Check stored token
       const token = localStorage.getItem('formline_token');
       if (!token) {
         if (!cancelled) setLoading(false);
@@ -73,10 +73,18 @@ export function AuthProvider({ children }) {
   }
 
   async function loginWithGoogle() {
-    // Just kick off the redirect. Page navigates away.
-    // When user comes back, `getGoogleRedirectResult()` finishes the job.
-    await firebaseGoogleSignIn();
-    return null;
+    try {
+      const idToken = await firebaseGoogleSignIn();
+      if (!idToken) throw new Error('No token returned from Google');
+      console.log('Got Google ID token, sending to backend...');
+      const res = await authApi.googleLogin(idToken);
+      console.log('Backend responded:', res);
+      persist(res.token, res.user);
+      return res;
+    } catch (err) {
+      console.error('loginWithGoogle failed:', err);
+      throw err;
+    }
   }
 
   function logout() {

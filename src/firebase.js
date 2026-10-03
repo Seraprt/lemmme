@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithRedirect,
+  signInWithPopup,
   getRedirectResult,
 } from 'firebase/auth';
 
@@ -19,25 +19,18 @@ export const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-/**
- * Starts Google sign-in via full-page redirect.
- * Works even when ad scripts block popups.
- * Returns null — the page navigates away, then back.
- */
 export async function signInWithGoogle() {
   try {
-    await signInWithRedirect(auth, googleProvider);
-    return null; // page reloads, so we never reach this return
+    const result = await signInWithPopup(auth, googleProvider);
+    const idToken = await result.user.getIdToken();
+    return idToken;
   } catch (err) {
-    console.error('Google redirect start error:', err);
+    console.error('Google popup error:', err.code, err.message);
     throw err;
   }
 }
 
-/**
- * Called on app load to check if we just came back from Google.
- * Returns the Firebase ID token if successful, null otherwise.
- */
+// Keep this — used by AuthContext on load. Returns null if no redirect happened.
 export async function getGoogleRedirectResult() {
   try {
     const result = await getRedirectResult(auth);
@@ -46,7 +39,7 @@ export async function getGoogleRedirectResult() {
     }
     return null;
   } catch (err) {
-    console.error('Google redirect result error:', err);
+    console.error('Redirect result error:', err.code, err.message);
     return null;
   }
 }
