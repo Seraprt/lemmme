@@ -6,7 +6,6 @@ import Compare from './pages/Compare';
 import Search from './pages/Search';
 import TeamDetail from './pages/TeamDetail';
 import Profile from './pages/Profile';
-import AdScripts from './components/AdScripts';
 
 export default function App() {
   const { user, loading } = useAuth();
@@ -46,9 +45,6 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* Ads load only after sign-in */}
-      <AdScripts />
-
       <header className="topbar">
         <div className="brand">
           <svg width="26" height="26" viewBox="0 0 48 48" fill="none">
