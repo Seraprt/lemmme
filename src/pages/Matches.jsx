@@ -197,16 +197,28 @@ export default function Matches() {
           onToggle={() => toggle(m.match_id)}
         />
       );
-      // Inline smartlink after 3rd card
+
+      // ── Adsterra banner after 3rd card ──
       if (idx === 2) {
+        items.push(
+          <BannerAd key={`banner-${m.match_id}`} height={250} width={300} />
+        );
         items.push(
           <Smartlink key={`sl-${m.match_id}`} text="Special Offer" type="adsterra" />
         );
       }
-      // Second smartlink after 6th card (monetag)
+
+      // ── Monetag smartlink after 6th card ──
       if (idx === 5) {
         items.push(
           <Smartlink key={`sl2-${m.match_id}`} text="Sponsored" type="monetag" />
+        );
+      }
+
+      // ── Another Adsterra banner after 9th card (if many matches) ──
+      if (idx === 8) {
+        items.push(
+          <BannerAd key={`banner2-${m.match_id}`} height={250} width={300} />
         );
       }
     });
@@ -297,7 +309,7 @@ export default function Matches() {
         ))}
       </div>
 
-      {/* Adsterra Banner */}
+      {/* Top banner — above the list */}
       <BannerAd height={250} width={300} />
 
       <div className="list">
