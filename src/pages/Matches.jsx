@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { matchApi } from '../api';
 import Crest from '../components/Crest';
+import Smartlink from '../components/Smartlink';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
@@ -45,7 +46,7 @@ function MatchCard({ match, isOpen, onToggle }) {
     <article className="card">
       <div className="match-top">
         <span className="league">
-          {isCustom && <span className="custom-tag"> Custom</span>}
+          {isCustom && <span className="custom-tag">Custom</span>}
           {match.tournament || 'League'}
         </span>
         <span className="time">
@@ -99,9 +100,8 @@ function MatchCard({ match, isOpen, onToggle }) {
 
       {isCustom ? (
         <div className="custom-notice">
-          🔴🟢🔵{' '}
           {match.custom_notice ||
-            'Daily picks for you.'}
+            'This league is not covered by our main data feed — prediction is a manual market suggestion.'}
         </div>
       ) : (
         <>
@@ -186,14 +186,30 @@ export default function Matches() {
   };
 
   const cards = useMemo(() => {
-    return matches.map((m) => (
-      <MatchCard
-        key={m.match_id}
-        match={m}
-        isOpen={openSet.has(m.match_id)}
-        onToggle={() => toggle(m.match_id)}
-      />
-    ));
+    const items = [];
+    matches.forEach((m, idx) => {
+      items.push(
+        <MatchCard
+          key={m.match_id}
+          match={m}
+          isOpen={openSet.has(m.match_id)}
+          onToggle={() => toggle(m.match_id)}
+        />
+      );
+      // Inline smartlink after 3rd card
+      if (idx === 2) {
+        items.push(
+          <Smartlink key={`ad-${m.match_id}`} text="Special Offer" type="adsterra" />
+        );
+      }
+      // Second smartlink after 6th card (monetag)
+      if (idx === 5) {
+        items.push(
+          <Smartlink key={`ad2-${m.match_id}`} text="Sponsored" type="monetag" />
+        );
+      }
+    });
+    return items;
   }, [matches, openSet]);
 
   return (
@@ -241,7 +257,7 @@ export default function Matches() {
       </div>
 
       {customDate && (
-        <div className="date-active-pill">📅 Showing {prettyDate(customDate)}</div>
+        <div className="date-active-pill">Showing {prettyDate(customDate)}</div>
       )}
 
       {!customDate && (

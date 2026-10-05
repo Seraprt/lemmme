@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Crest from '../components/Crest';
+import Smartlink from '../components/Smartlink';
 import { teamApi } from '../api';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
-// ── Strength reads ──
 function readHome(v) {
   if (v < 0.4) return { tone: 'bad', label: 'Weak at home', text: 'They give up their home advantage.' };
   if (v < 0.6) return { tone: 'warn', label: 'Average', text: 'A normal home record. No major edge.' };
@@ -28,7 +28,6 @@ function readAttack(v) {
 }
 
 function readDefence(v) {
-  // LOWER defence_rating = BETTER defence
   if (v <= 0.7) return { tone: 'good', label: 'Elite defence', note: 'Concedes far less than league average — hard to break down.' };
   if (v <= 0.9) return { tone: 'good', label: 'Strong defence', note: 'Concedes less than average — a reliable back line.' };
   if (v <= 1.1) return { tone: 'ok', label: 'Average defence', note: 'Concedes roughly league average.' };
@@ -137,7 +136,6 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </div>
       )}
 
-      {/* ── NEXT MATCH ── */}
       {team.next_match && team.next_match.opponent && (
         <>
           <div className="sec-head">
@@ -169,7 +167,6 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </>
       )}
 
-      {/* ── RECENT RESULTS ── */}
       {team.recent_matches?.length > 0 && (
         <>
           <div className="sec-head">
@@ -226,7 +223,6 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         <span>0 – 100 scale</span>
       </div>
 
-      {/* Attack */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Attack</span>
@@ -247,7 +243,6 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </p>
       </div>
 
-      {/* Defence */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Defence</span>
@@ -268,7 +263,6 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </p>
       </div>
 
-      {/* Home */}
       <div className="meter">
         <div className="meter-top">
           <span className="meter-name">Home strength</span>
@@ -291,7 +285,6 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         <p className="meter-note">{homeRead.text}</p>
       </div>
 
-      {/* Away */}
       <div className="meter" style={{ borderBottom: 0 }}>
         <div className="meter-top">
           <span className="meter-name">Away strength</span>
@@ -313,6 +306,8 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
         </div>
         <p className="meter-note">{awayRead.text}</p>
       </div>
+
+      <Smartlink text="Special Offer" type="adsterra" />
 
       <div style={{ padding: '20px 16px 28px' }}>
         <button

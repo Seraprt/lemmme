@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import Smartlink from '../components/Smartlink';
 
 const SOCIALS = [
   {
@@ -72,7 +73,9 @@ export default function Profile({ onBack }) {
         <h1>{user.username}</h1>
         <p>{user.email}</p>
         <span className="profile-provider">
-          {user.provider === 'google' ? ' Signed in with Google' : ' Signed in with email'}
+          {user.provider === 'google'
+            ? 'Signed in with Google'
+            : 'Signed in with email'}
         </span>
       </div>
 
@@ -98,7 +101,8 @@ export default function Profile({ onBack }) {
         </div>
       </div>
 
-      {/* Social reach */}
+      <Smartlink text="Special Offer" type="adsterra" />
+
       <div className="sec-head">
         <h2>Follow Formline</h2>
         <span>Stay updated</span>
@@ -132,7 +136,7 @@ export default function Profile({ onBack }) {
           }}
           onClick={logout}
         >
-           Sign out
+          Sign out
         </button>
       </div>
     </div>

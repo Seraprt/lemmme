@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import Crest from '../components/Crest';
 import TeamPickerSheet from '../components/TeamPickerSheet';
+import Smartlink from '../components/Smartlink';
 import { predictionApi, teamApi } from '../api';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
-// Return 0-1 so barRow handles the percentage
 function defenceBar(rating) {
   return Math.max(0, Math.min(1, (2.5 - (rating || 1)) / 2.2));
 }
@@ -138,11 +138,10 @@ export default function Compare({ prefill, clearPrefill }) {
         <span>Head to head</span>
       </div>
 
-      {/* Current stats notice */}
       <div className="compare-notice">
-        ℹ️ Predictions are based on each team's <strong>current stats</strong> — attack,
-        defence, form, and home/away strength. They don't account for injuries,
-        lineups, or last-minute news.
+        Predictions are based on each team's <strong>current stats</strong> —
+        attack, defence, form, and home/away strength. They don't account for
+        injuries, lineups, or last-minute news.
       </div>
 
       <div className="picker">
@@ -243,6 +242,8 @@ export default function Compare({ prefill, clearPrefill }) {
               );
             })}
           </div>
+
+          <Smartlink text="Special Offer" type="adsterra" />
         </>
       )}
 
@@ -287,6 +288,8 @@ export default function Compare({ prefill, clearPrefill }) {
               </span>
             </div>
           )}
+
+          <Smartlink text="Sponsored" type="monetag" />
 
           <div className="sec-head">
             <h2>Head to head</h2>

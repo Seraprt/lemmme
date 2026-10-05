@@ -3,6 +3,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   getRedirectResult,
 } from 'firebase/auth';
 
@@ -25,21 +26,30 @@ export async function signInWithGoogle() {
     const idToken = await result.user.getIdToken();
     return idToken;
   } catch (err) {
-    console.error('Google popup error:', err.code, err.message);
+    console.warn('Popup failed:', err.code);
+    // Fallback for popup-blocked
+    if (
+      err.code === 'auth/popup-blocked' ||
+      err.code === 'auth/popup-closed-by-user' ||
+      err.code === 'auth/cancelled-popup-request' ||
+      err.code === 'auth/operation-not-supported-in-this-environment' ||
+      err.code === 'auth/internal-error'
+    ) {
+      console.log('Falling back to redirect...');
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    }
     throw err;
   }
 }
 
-// Keep this — used by AuthContext on load. Returns null if no redirect happened.
 export async function getGoogleRedirectResult() {
   try {
     const result = await getRedirectResult(auth);
-    if (result?.user) {
-      return await result.user.getIdToken();
-    }
+    if (result?.user) return await result.user.getIdToken();
     return null;
   } catch (err) {
-    console.error('Redirect result error:', err.code, err.message);
+    console.error('Redirect result error:', err);
     return null;
   }
 }
