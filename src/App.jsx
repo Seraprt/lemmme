@@ -6,6 +6,7 @@ import Compare from './pages/Compare';
 import Search from './pages/Search';
 import TeamDetail from './pages/TeamDetail';
 import Profile from './pages/Profile';
+import PromoPopup from './components/PromoPopup';
 
 export default function App() {
   const { user, loading } = useAuth();
@@ -117,6 +118,9 @@ export default function App() {
           </button>
         </nav>
       )}
+
+      {/* Global promo popup — only shown to logged-in users */}
+      <PromoPopup />
     </div>
   );
 }

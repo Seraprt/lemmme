@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { matchApi } from '../api';
 import Crest from '../components/Crest';
 import Smartlink from '../components/Smartlink';
+import BannerAd from '../components/BannerAd';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
@@ -199,13 +200,13 @@ export default function Matches() {
       // Inline smartlink after 3rd card
       if (idx === 2) {
         items.push(
-          <Smartlink key={`ad-${m.match_id}`} text="Special Offer" type="adsterra" />
+          <Smartlink key={`sl-${m.match_id}`} text="Special Offer" type="adsterra" />
         );
       }
       // Second smartlink after 6th card (monetag)
       if (idx === 5) {
         items.push(
-          <Smartlink key={`ad2-${m.match_id}`} text="Sponsored" type="monetag" />
+          <Smartlink key={`sl2-${m.match_id}`} text="Sponsored" type="monetag" />
         );
       }
     });
@@ -295,6 +296,9 @@ export default function Matches() {
           </button>
         ))}
       </div>
+
+      {/* Adsterra Banner */}
+      <BannerAd height={250} width={300} />
 
       <div className="list">
         {loading && (

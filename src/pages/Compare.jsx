@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Crest from '../components/Crest';
 import TeamPickerSheet from '../components/TeamPickerSheet';
 import Smartlink from '../components/Smartlink';
+import BannerAd from '../components/BannerAd';
 import { predictionApi, teamApi } from '../api';
 
 const pct = (v) => Math.round((v || 0) * 100);
@@ -143,6 +144,9 @@ export default function Compare({ prefill, clearPrefill }) {
         attack, defence, form, and home/away strength. They don't account for
         injuries, lineups, or last-minute news.
       </div>
+
+      {/* Adsterra Banner */}
+      <BannerAd height={250} width={300} />
 
       <div className="picker">
         <button

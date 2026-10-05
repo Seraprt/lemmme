@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Crest from '../components/Crest';
 import Smartlink from '../components/Smartlink';
+import BannerAd from '../components/BannerAd';
 import { teamApi } from '../api';
 
 const pct = (v) => Math.round((v || 0) * 100);
@@ -217,6 +218,9 @@ export default function TeamDetail({ teamId, onBack, onCompareWith }) {
           </div>
         </>
       )}
+
+      {/* Adsterra Banner */}
+      <BannerAd height={250} width={300} />
 
       <div className="sec-head">
         <h2>Team strength</h2>
