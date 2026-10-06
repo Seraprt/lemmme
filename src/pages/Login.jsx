@@ -152,7 +152,7 @@ export default function Login() {
         {/* Social links */}
         <SocialLinks title="Follow Formline" />
 
-        {/* Banner — placed at the very bottom, below the login form */}
+        {/* Banner */}
         <div style={{ marginTop: 24 }}>
           <BannerAd height={250} width={300} />
         </div>

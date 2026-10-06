@@ -48,7 +48,7 @@ function MatchCard({ match, isOpen, onToggle }) {
     <article className="card">
       <div className="match-top">
         <span className="league">
-          {isCustom && <span className="custom-tag">Mid leagues</span>}
+          {isCustom && <span className="custom-tag">Mid league</span>}
           {match.tournament || 'League'}
         </span>
         <span className="time">
@@ -100,12 +100,7 @@ function MatchCard({ match, isOpen, onToggle }) {
         )}
       </div>
 
-      {isCustom ? (
-        <div className="custom-notice">
-          {match.custom_notice ||
-            'formline'}
-        </div>
-      ) : (
+      {!isCustom && (
         <>
           {match.secondary_pick && (
             <div className="secondary-pick">

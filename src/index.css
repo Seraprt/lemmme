@@ -388,12 +388,27 @@ a { color: inherit; text-decoration: none; }
 /* ══════════════════════════════════════════════
    LOGIN
    ══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   LOGIN
+   ══════════════════════════════════════════════ */
 .login {
-  position: fixed; inset: 0; z-index: 200; background: var(--bg);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 32px 24px calc(32px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
-.login-inner { width: 100%; max-width: 360px; }
+
+.login-inner {
+  width: 100%;
+  max-width: 360px;
+  margin: auto 0;
+}
 .login-logo { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 34px; }
 .login-logo h1 { font-size: 24px; font-weight: 800; letter-spacing: -.04em; }
 .login-logo p { font-size: 12.5px; color: var(--muted); text-align: center; max-width: 250px; line-height: 1.5; }
