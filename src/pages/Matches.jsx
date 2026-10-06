@@ -3,6 +3,7 @@ import { matchApi } from '../api';
 import Crest from '../components/Crest';
 import Smartlink from '../components/Smartlink';
 import BannerAd from '../components/BannerAd';
+import SocialLinks from '../components/SocialLinks';
 
 const pct = (v) => Math.round((v || 0) * 100);
 
@@ -47,7 +48,7 @@ function MatchCard({ match, isOpen, onToggle }) {
     <article className="card">
       <div className="match-top">
         <span className="league">
-          {isCustom && <span className="custom-tag">Custom</span>}
+          {isCustom && <span className="custom-tag">Mid leagues</span>}
           {match.tournament || 'League'}
         </span>
         <span className="time">
@@ -102,7 +103,7 @@ function MatchCard({ match, isOpen, onToggle }) {
       {isCustom ? (
         <div className="custom-notice">
           {match.custom_notice ||
-            'This league is not covered by our main data feed — prediction is a manual market suggestion.'}
+            'formline'}
         </div>
       ) : (
         <>
@@ -198,7 +199,7 @@ export default function Matches() {
         />
       );
 
-      // ── Adsterra banner after 3rd card ──
+      // Adsterra banner + smartlink after 3rd card
       if (idx === 2) {
         items.push(
           <BannerAd key={`banner-${m.match_id}`} height={250} width={300} />
@@ -208,14 +209,14 @@ export default function Matches() {
         );
       }
 
-      // ── Monetag smartlink after 6th card ──
+      // Monetag smartlink after 6th card
       if (idx === 5) {
         items.push(
           <Smartlink key={`sl2-${m.match_id}`} text="Sponsored" type="monetag" />
         );
       }
 
-      // ── Another Adsterra banner after 9th card (if many matches) ──
+      // Another Adsterra banner after 9th card
       if (idx === 8) {
         items.push(
           <BannerAd key={`banner2-${m.match_id}`} height={250} width={300} />
@@ -309,7 +310,7 @@ export default function Matches() {
         ))}
       </div>
 
-      {/* Top banner — above the list */}
+      {/* Top banner above the match list */}
       <BannerAd height={250} width={300} />
 
       <div className="list">
@@ -343,6 +344,11 @@ export default function Matches() {
 
         {!loading && cards}
       </div>
+
+      {/* Social links at the bottom of the page */}
+      <SocialLinks title="Follow Formline" />
+
+      <div style={{ height: 24 }} />
     </div>
   );
 }

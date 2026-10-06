@@ -1342,3 +1342,112 @@ a { color: inherit; text-decoration: none; }
   transition: 0.15s;
 }
 .promo-dismiss:active { background: var(--surface-2); }
+
+/* ══════════════════════════════════════════════
+   SOCIAL LINKS
+   ══════════════════════════════════════════════ */
+.social-block {
+  margin-top: 8px;
+}
+
+.social-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.social-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  transition: 0.15s;
+}
+
+.social-item:active {
+  background: var(--surface-2);
+  transform: scale(0.99);
+}
+
+.social-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  color: var(--sc, var(--muted));
+}
+
+.social-name {
+  flex: 1;
+}
+
+.social-arrow {
+  color: var(--dim);
+  font-size: 14px;
+}
+
+/* Compact variant for login page */
+.login .social-list {
+  padding: 0;
+}
+
+.login .social-block {
+  margin-top: 26px;
+  text-align: center;
+}
+
+.login .sec-head {
+  padding: 0 0 8px;
+  justify-content: center;
+  gap: 8px;
+}
+
+.login .sec-head h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  font-weight: 800;
+}
+
+.login .sec-head span {
+  display: none;
+}
+
+.login .social-item {
+  padding: 10px 12px;
+  font-size: 12.5px;
+}
+/* ══════════════════════════════════════════════
+   SEARCH STATUS / INLINE SPINNER
+   ══════════════════════════════════════════════ */
+.search-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 16px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.spinner-inline {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex: none;
+}

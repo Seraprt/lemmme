@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import BannerAd from '../components/BannerAd';
+import SocialLinks from '../components/SocialLinks';
 
 export default function Login() {
   const { loginWithEmail, signupWithEmail, loginWithGoogle } = useAuth();
@@ -38,9 +40,7 @@ export default function Login() {
     setError('');
     setBusy(true);
     try {
-      console.log('Starting Google popup...');
       await loginWithGoogle();
-      console.log('Google login finished successfully');
     } catch (err) {
       console.error('Google login error:', err);
       setError(err.message || 'Google sign-in failed');
@@ -149,24 +149,12 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="login-socials">
-          <p className="login-socials-title">Follow our football insights</p>
-          <div className="login-socials-row">
-            <a href="#" className="social-link" aria-label="Instagram">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="2" width="20" height="20" rx="5" />
-                <circle cx="12" cy="12" r="4" />
-                <circle cx="18" cy="6" r="1" fill="currentColor" stroke="none" />
-              </svg>
-              Instagram
-            </a>
-            <a href="#" className="social-link" aria-label="TikTok">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 8.5a6.5 6.5 0 0 1-5-2.5v9.5A5 5 0 1 1 10 10.5v3a2 2 0 1 0 2 2V3h3a5.5 5.5 0 0 0 5 5.5v3z" />
-              </svg>
-              TikTok
-            </a>
-          </div>
+        {/* Social links */}
+        <SocialLinks title="Follow Formline" />
+
+        {/* Banner — placed at the very bottom, below the login form */}
+        <div style={{ marginTop: 24 }}>
+          <BannerAd height={250} width={300} />
         </div>
       </div>
     </div>
