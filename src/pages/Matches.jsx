@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { matchApi } from '../api';
+import { matchApi, dailyMessageApi } from '../api';
 import Crest from '../components/Crest';
 import Smartlink from '../components/Smartlink';
 import BannerAd from '../components/BannerAd';
@@ -36,6 +36,67 @@ function derivePick(match) {
   if (homeWin > awayWin && homeWin > draw) return `${match.home?.name} win`;
   if (awayWin > homeWin && awayWin > draw) return `${match.away?.name} win`;
   return 'Draw';
+}
+
+function DailyMessageCard({ heading, body }) {
+  return (
+    <div
+      style={{
+        background:
+          'linear-gradient(140deg, rgba(200,247,81,0.10), rgba(200,247,81,0.02))',
+        border: '1px solid rgba(200,247,81,0.28)',
+        borderRadius: 14,
+        padding: '16px 16px 18px',
+        marginBottom: 16,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: '0.10em',
+            textTransform: 'uppercase',
+            color: '#C8F751',
+            background: 'rgba(200,247,81,0.14)',
+            padding: '3px 8px',
+            borderRadius: 6,
+          }}
+        >
+          Daily Update
+        </span>
+      </div>
+      <h3
+        style={{
+          margin: '0 0 6px',
+          fontSize: 17,
+          fontWeight: 800,
+          letterSpacing: '-0.02em',
+          color: '#E9EEF6',
+        }}
+      >
+        {heading}
+      </h3>
+      <p
+        style={{
+          margin: 0,
+          fontSize: 13.5,
+          lineHeight: 1.5,
+          color: '#B6BEC9',
+          whiteSpace: 'pre-wrap',
+        }}
+      >
+        {body}
+      </p>
+    </div>
+  );
 }
 
 function MatchCard({ match, isOpen, onToggle }) {
@@ -151,9 +212,20 @@ export default function Matches() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openSet, setOpenSet] = useState(new Set());
+  const [dailyMsg, setDailyMsg] = useState(null);
 
   useEffect(() => {
     matchApi.leagues().then(setLeagues).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    dailyMessageApi
+      .get()
+      .then((d) => {
+        if (d && d.heading && d.body) setDailyMsg(d);
+        else setDailyMsg(null);
+      })
+      .catch(() => setDailyMsg(null));
   }, []);
 
   useEffect(() => {
@@ -223,6 +295,10 @@ export default function Matches() {
 
   return (
     <div className="screen">
+      {dailyMsg && (
+        <DailyMessageCard heading={dailyMsg.heading} body={dailyMsg.body} />
+      )}
+
       <div className="date-custom">
         <label htmlFor="datePicker">
           <svg

@@ -62,3 +62,8 @@ export const predictionApi = {
       }`
     ),
 };
+
+// ───── Daily Message ─────
+export const dailyMessageApi = {
+  get: () => api('/daily-message', { auth: false }),
+};
