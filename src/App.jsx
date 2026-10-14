@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Matches from './pages/Matches';
+import MatchDetail from './pages/MatchDetail';
 import Compare from './pages/Compare';
 import Search from './pages/Search';
 import TeamDetail from './pages/TeamDetail';
@@ -12,7 +13,9 @@ export default function App() {
   const { user, loading } = useAuth();
   const [screen, setScreen] = useState('matches');
   const [openTeamId, setOpenTeamId] = useState(null);
+  const [openMatchId, setOpenMatchId] = useState(null);
   const [comparePrefill, setComparePrefill] = useState(null);
+  const [teamBackTarget, setTeamBackTarget] = useState('search');
 
   if (loading) {
     return (
@@ -29,11 +32,18 @@ export default function App() {
   function go(target) {
     setScreen(target);
     if (target !== 'team') setOpenTeamId(null);
+    if (target !== 'match') setOpenMatchId(null);
   }
 
-  function openTeam(id) {
+  function openTeam(id, from = 'search') {
     setOpenTeamId(id);
+    setTeamBackTarget(from);
     setScreen('team');
+  }
+
+  function openMatch(id) {
+    setOpenMatchId(id);
+    setScreen('match');
   }
 
   function handleCompareWith(team) {
@@ -68,15 +78,22 @@ export default function App() {
       </header>
 
       <main className="main">
-        {screen === 'matches' && <Matches />}
+        {screen === 'matches' && <Matches onOpenMatch={openMatch} />}
+        {screen === 'match' && openMatchId && (
+          <MatchDetail
+            matchId={openMatchId}
+            onBack={() => go('matches')}
+            onOpenTeam={(id) => openTeam(id, 'match')}
+          />
+        )}
         {screen === 'compare' && (
           <Compare prefill={comparePrefill} clearPrefill={() => setComparePrefill(null)} />
         )}
-        {screen === 'search' && <Search onOpenTeam={openTeam} />}
+        {screen === 'search' && <Search onOpenTeam={(id) => openTeam(id, 'search')} />}
         {screen === 'team' && (
           <TeamDetail
             teamId={openTeamId}
-            onBack={() => go('search')}
+            onBack={() => go(teamBackTarget)}
             onCompareWith={handleCompareWith}
           />
         )}
@@ -85,7 +102,7 @@ export default function App() {
         )}
       </main>
 
-      {screen !== 'profile' && (
+      {screen !== 'profile' && screen !== 'match' && (
         <nav className="tabbar">
           <button
             className={`tab ${screen === 'matches' ? 'active' : ''}`}
@@ -119,7 +136,6 @@ export default function App() {
         </nav>
       )}
 
-      {/* Global promo popup — only shown to logged-in users */}
       <PromoPopup />
     </div>
   );

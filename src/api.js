@@ -1,8 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-/**
- * Small fetch wrapper that always sends the JWT if present.
- */
 export async function api(path, { method = 'GET', body, headers = {}, auth = true } = {}) {
   const finalHeaders = { 'Content-Type': 'application/json', ...headers };
 
@@ -51,6 +48,7 @@ export const matchApi = {
     return api(`/matches/analysis?${params.toString()}`);
   },
   leagues: () => api('/matches/leagues'),
+  detail: (id) => api(`/matches/detail/${id}`),
 };
 
 // ───── Predictions ─────

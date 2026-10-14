@@ -20,10 +20,7 @@ function prettyDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString(undefined, {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
+    weekday: 'long', day: 'numeric', month: 'short', year: 'numeric',
   });
 }
 
@@ -42,71 +39,46 @@ function DailyMessageCard({ heading, body }) {
   return (
     <div
       style={{
-        background:
-          'linear-gradient(140deg, rgba(200,247,81,0.10), rgba(200,247,81,0.02))',
+        background: 'linear-gradient(140deg, rgba(200,247,81,0.10), rgba(200,247,81,0.02))',
         border: '1px solid rgba(200,247,81,0.28)',
         borderRadius: 14,
         padding: '16px 16px 18px',
         marginBottom: 16,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          marginBottom: 8,
-        }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <span
           style={{
-            fontSize: 10,
-            fontWeight: 800,
-            letterSpacing: '0.10em',
-            textTransform: 'uppercase',
-            color: '#C8F751',
-            background: 'rgba(200,247,81,0.14)',
-            padding: '3px 8px',
-            borderRadius: 6,
+            fontSize: 10, fontWeight: 800, letterSpacing: '0.10em',
+            textTransform: 'uppercase', color: '#C8F751',
+            background: 'rgba(200,247,81,0.14)', padding: '3px 8px', borderRadius: 6,
           }}
         >
           Daily Update
         </span>
       </div>
-      <h3
-        style={{
-          margin: '0 0 6px',
-          fontSize: 17,
-          fontWeight: 800,
-          letterSpacing: '-0.02em',
-          color: '#E9EEF6',
-        }}
-      >
+      <h3 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 800, letterSpacing: '-0.02em', color: '#E9EEF6' }}>
         {heading}
       </h3>
-      <p
-        style={{
-          margin: 0,
-          fontSize: 13.5,
-          lineHeight: 1.5,
-          color: '#B6BEC9',
-          whiteSpace: 'pre-wrap',
-        }}
-      >
+      <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5, color: '#B6BEC9', whiteSpace: 'pre-wrap' }}>
         {body}
       </p>
     </div>
   );
 }
 
-function MatchCard({ match, isOpen, onToggle }) {
+function MatchCard({ match, isOpen, onToggle, onOpen }) {
   const confidence = match.confidence || 0;
   const pick = derivePick(match);
   const score = match.correct_score || null;
   const isCustom = match.is_custom === true;
 
   return (
-    <article className="card">
+    <article
+      className="card"
+      onClick={() => onOpen(match.match_id)}
+      style={{ cursor: 'pointer' }}
+    >
       <div className="match-top">
         <span className="league">
           {isCustom && <span className="custom-tag">Mid league</span>}
@@ -114,9 +86,7 @@ function MatchCard({ match, isOpen, onToggle }) {
         </span>
         <span className="time">
           {new Date(match.date).toLocaleString(undefined, {
-            weekday: 'short',
-            hour: '2-digit',
-            minute: '2-digit',
+            weekday: 'short', hour: '2-digit', minute: '2-digit',
           })}
         </span>
       </div>
@@ -132,9 +102,7 @@ function MatchCard({ match, isOpen, onToggle }) {
 
       <div className="pred-strip">
         <div className="pred-left">
-          <span className="pred-label">
-            {isCustom ? 'Suggested' : 'Predicted'}
-          </span>
+          <span className="pred-label">{isCustom ? 'Suggested' : 'Predicted'}</span>
           <span className="pred-pick">{pick}</span>
         </div>
 
@@ -146,9 +114,7 @@ function MatchCard({ match, isOpen, onToggle }) {
               .map((c, i) => (c === '–' ? <i key={i}>–</i> : c))}
           </div>
         ) : (
-          <div className="pred-score" style={{ fontSize: 13, opacity: 0.5 }}>
-            —
-          </div>
+          <div className="pred-score" style={{ fontSize: 13, opacity: 0.5 }}>—</div>
         )}
 
         {!isCustom && (
@@ -167,8 +133,7 @@ function MatchCard({ match, isOpen, onToggle }) {
             <div className="secondary-pick">
               <span className="secondary-label">Also consider:</span>
               <span className="secondary-value">
-                {match.secondary_pick.label} (
-                {(match.secondary_pick.probability * 100).toFixed(0)}%)
+                {match.secondary_pick.label} ({(match.secondary_pick.probability * 100).toFixed(0)}%)
               </span>
             </div>
           )}
@@ -177,18 +142,16 @@ function MatchCard({ match, isOpen, onToggle }) {
             <>
               <button
                 className={`why-toggle ${isOpen ? 'open' : ''}`}
-                onClick={onToggle}
+                onClick={(e) => { e.stopPropagation(); onToggle(); }}
               >
                 Why this pick ({match.reasons.length})
                 <span className="chev">▾</span>
               </button>
               {isOpen && (
-                <div className="why">
+                <div className="why" onClick={(e) => e.stopPropagation()}>
                   {match.reasons.map((r, i) => (
                     <div className="reason" data-tone={r.tone} key={i}>
-                      <span className="reason-w">
-                        {Math.round((r.weight || 0) * 100)}
-                      </span>
+                      <span className="reason-w">{Math.round((r.weight || 0) * 100)}</span>
                       <span className="reason-tag">{r.tag}</span>
                       <p className="reason-title">{r.title}</p>
                       <p className="reason-text">{r.text}</p>
@@ -204,7 +167,7 @@ function MatchCard({ match, isOpen, onToggle }) {
   );
 }
 
-export default function Matches() {
+export default function Matches({ onOpenMatch = () => {} }) {
   const [day, setDay] = useState(0);
   const [customDate, setCustomDate] = useState('');
   const [league, setLeague] = useState('All');
@@ -263,54 +226,31 @@ export default function Matches() {
           match={m}
           isOpen={openSet.has(m.match_id)}
           onToggle={() => toggle(m.match_id)}
+          onOpen={onOpenMatch}
         />
       );
 
-      // Adsterra banner + smartlink after 3rd card
       if (idx === 2) {
-        items.push(
-          <BannerAd key={`banner-${m.match_id}`} height={250} width={300} />
-        );
-        items.push(
-          <Smartlink key={`sl-${m.match_id}`} text="Special Offer" type="adsterra" />
-        );
+        items.push(<BannerAd key={`banner-${m.match_id}`} height={250} width={300} />);
+        items.push(<Smartlink key={`sl-${m.match_id}`} text="Special Offer" type="adsterra" />);
       }
-
-      // Monetag smartlink after 6th card
       if (idx === 5) {
-        items.push(
-          <Smartlink key={`sl2-${m.match_id}`} text="Sponsored" type="monetag" />
-        );
+        items.push(<Smartlink key={`sl2-${m.match_id}`} text="Sponsored" type="monetag" />);
       }
-
-      // Another Adsterra banner after 9th card
       if (idx === 8) {
-        items.push(
-          <BannerAd key={`banner2-${m.match_id}`} height={250} width={300} />
-        );
+        items.push(<BannerAd key={`banner2-${m.match_id}`} height={250} width={300} />);
       }
     });
     return items;
-  }, [matches, openSet]);
+  }, [matches, openSet, onOpenMatch]);
 
   return (
     <div className="screen">
-      {dailyMsg && (
-        <DailyMessageCard heading={dailyMsg.heading} body={dailyMsg.body} />
-      )}
+      {dailyMsg && <DailyMessageCard heading={dailyMsg.heading} body={dailyMsg.body} />}
 
       <div className="date-custom">
         <label htmlFor="datePicker">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="4" width="18" height="17" rx="3" />
             <path d="M3 9h18M8 2v4M16 2v4" />
           </svg>
@@ -322,19 +262,12 @@ export default function Matches() {
           value={customDate}
           min="2024-01-01"
           max="2030-12-31"
-          onChange={(e) => {
-            setCustomDate(e.target.value);
-            setOpenSet(new Set());
-          }}
+          onChange={(e) => { setCustomDate(e.target.value); setOpenSet(new Set()); }}
         />
         {customDate && (
           <button
             className="date-clear"
-            onClick={() => {
-              setCustomDate('');
-              setDay(0);
-              setOpenSet(new Set());
-            }}
+            onClick={() => { setCustomDate(''); setDay(0); setOpenSet(new Set()); }}
           >
             ✕
           </button>
@@ -353,10 +286,7 @@ export default function Matches() {
               <button
                 key={off}
                 className={`date ${day === off ? 'active' : ''}`}
-                onClick={() => {
-                  setDay(off);
-                  setOpenSet(new Set());
-                }}
+                onClick={() => { setDay(off); setOpenSet(new Set()); }}
               >
                 <b>{l.top}</b>
                 <span>{l.bot}</span>
@@ -371,42 +301,24 @@ export default function Matches() {
           <button
             key={lg}
             className={`chip ${league === lg ? 'active' : ''}`}
-            onClick={() => {
-              setLeague(lg);
-              setOpenSet(new Set());
-            }}
+            onClick={() => { setLeague(lg); setOpenSet(new Set()); }}
           >
             {lg}
           </button>
         ))}
       </div>
 
-      {/* Top banner above the match list */}
       <BannerAd height={250} width={300} />
 
       <div className="list">
         {loading && (
-          <div
-            style={{
-              padding: 40,
-              textAlign: 'center',
-              color: 'var(--dim)',
-              fontSize: 13,
-            }}
-          >
+          <div style={{ padding: 40, textAlign: 'center', color: 'var(--dim)', fontSize: 13 }}>
             Loading predictions…
           </div>
         )}
 
         {!loading && cards.length === 0 && (
-          <div
-            style={{
-              padding: 60,
-              textAlign: 'center',
-              color: 'var(--dim)',
-              fontSize: 13,
-            }}
-          >
+          <div style={{ padding: 60, textAlign: 'center', color: 'var(--dim)', fontSize: 13 }}>
             {customDate
               ? `No predictions for ${prettyDate(customDate)}.`
               : 'No predictions for this filter yet.'}
@@ -416,7 +328,6 @@ export default function Matches() {
         {!loading && cards}
       </div>
 
-      {/* Social links at the bottom of the page */}
       <SocialLinks title="Follow Formline" />
 
       <div style={{ height: 24 }} />
