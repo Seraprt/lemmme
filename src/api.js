@@ -65,3 +65,9 @@ export const predictionApi = {
 export const dailyMessageApi = {
   get: () => api('/daily-message', { auth: false }),
 };
+
+// ───── Accuracy Stats ─────
+export const accuracyApi = {
+  leagues: (refresh = false) =>
+    api(`/accuracy/leagues${refresh ? '?refresh=true' : ''}`, { auth: false }),
+};

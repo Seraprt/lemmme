@@ -3,6 +3,7 @@ import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Matches from './pages/Matches';
 import MatchDetail from './pages/MatchDetail';
+import LeagueAccuracy from './pages/LeagueAccuracy';
 import Compare from './pages/Compare';
 import Search from './pages/Search';
 import TeamDetail from './pages/TeamDetail';
@@ -68,13 +69,28 @@ export default function App() {
             FORM<em>LINE</em>
           </span>
         </div>
-        <button
-          className="avatar"
-          onClick={() => setScreen('profile')}
-          title="Profile"
-        >
-          {initials}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* TEMPORARY: stats entry — will move to Profile once Profile.jsx is wired */}
+          <button
+            onClick={() => setScreen('accuracy')}
+            title="Prediction Accuracy"
+            style={{
+              background: 'transparent', border: 0, cursor: 'pointer',
+              color: '#C8F751', padding: 6, display: 'grid', placeItems: 'center',
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+            </svg>
+          </button>
+          <button
+            className="avatar"
+            onClick={() => setScreen('profile')}
+            title="Profile"
+          >
+            {initials}
+          </button>
+        </div>
       </header>
 
       <main className="main">
@@ -85,6 +101,9 @@ export default function App() {
             onBack={() => go('matches')}
             onOpenTeam={(id) => openTeam(id, 'match')}
           />
+        )}
+        {screen === 'accuracy' && (
+          <LeagueAccuracy onBack={() => go('profile')} />
         )}
         {screen === 'compare' && (
           <Compare prefill={comparePrefill} clearPrefill={() => setComparePrefill(null)} />
@@ -102,7 +121,7 @@ export default function App() {
         )}
       </main>
 
-      {screen !== 'profile' && screen !== 'match' && (
+      {screen !== 'profile' && screen !== 'match' && screen !== 'accuracy' && (
         <nav className="tabbar">
           <button
             className={`tab ${screen === 'matches' ? 'active' : ''}`}

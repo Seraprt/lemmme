@@ -4,7 +4,7 @@ import Smartlink from '../components/Smartlink';
 import BannerAd from '../components/BannerAd';
 import SocialLinks from '../components/SocialLinks';
 
-export default function Profile({ onBack }) {
+export default function Profile({ onBack, onOpenAccuracy }) {
   const { user, logout } = useAuth();
 
   if (!user) {
@@ -61,6 +61,97 @@ export default function Profile({ onBack }) {
           </span>
         </div>
       </div>
+
+      {/* ── Performance ── */}
+      <div className="sec-head">
+        <h2>Performance</h2>
+        <span>Stats</span>
+      </div>
+
+      <button
+        onClick={() => onOpenAccuracy && onOpenAccuracy()}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          width: 'calc(100% - 32px)',
+          margin: '0 16px',
+          padding: '14px 16px',
+          background:
+            'linear-gradient(140deg, rgba(200,247,81,0.08), rgba(200,247,81,0.02))',
+          border: '1px solid rgba(200,247,81,0.28)',
+          borderRadius: 12,
+          color: '#E9EEF6',
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          textAlign: 'left',
+          transition: '0.15s',
+        }}
+        onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.985)')}
+        onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+      >
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 10,
+            background: 'rgba(200,247,81,0.14)',
+            display: 'grid',
+            placeItems: 'center',
+            color: '#C8F751',
+            flex: '0 0 auto',
+          }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+          </svg>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 13.5,
+              fontWeight: 700,
+              color: '#E9EEF6',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            Prediction Accuracy
+          </div>
+          <div
+            style={{
+              fontSize: 11.5,
+              color: '#8792A3',
+              marginTop: 2,
+              lineHeight: 1.35,
+            }}
+          >
+            Win rates by league — best pick, sure bet, secondary, correct score
+          </div>
+        </div>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#C8F751"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ flex: '0 0 auto' }}
+        >
+          <path d="m9 6 6 6-6 6" />
+        </svg>
+      </button>
 
       {/* Adsterra Banner */}
       <BannerAd height={250} width={300} />
