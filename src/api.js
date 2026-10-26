@@ -71,3 +71,8 @@ export const accuracyApi = {
   leagues: (refresh = false) =>
     api(`/accuracy/leagues${refresh ? '?refresh=true' : ''}`, { auth: false }),
 };
+// ───── Rankings ─────
+export const rankingsApi = {
+  list: (type, { limit = 20, minMatches = 10 } = {}) =>
+    api(`/rankings?type=${type}&limit=${limit}&min_matches=${minMatches}`, { auth: false }),
+};

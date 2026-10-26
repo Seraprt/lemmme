@@ -4,7 +4,70 @@ import Smartlink from '../components/Smartlink';
 import BannerAd from '../components/BannerAd';
 import SocialLinks from '../components/SocialLinks';
 
-export default function Profile({ onBack, onOpenAccuracy }) {
+function InsightCard({ accent, icon, title, subtitle, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        width: 'calc(100% - 32px)',
+        margin: '0 16px 8px',
+        padding: '14px 16px',
+        background: `linear-gradient(140deg, ${accent}14, ${accent}05)`,
+        border: `1px solid ${accent}47`,
+        borderRadius: 12,
+        color: '#E9EEF6',
+        cursor: 'pointer',
+        fontFamily: 'inherit',
+        textAlign: 'left',
+        transition: '0.15s',
+      }}
+      onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.985)')}
+      onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+    >
+      <div
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 10,
+          background: `${accent}24`,
+          display: 'grid',
+          placeItems: 'center',
+          color: accent,
+          flex: '0 0 auto',
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: '#E9EEF6', letterSpacing: '-0.01em' }}>
+          {title}
+        </div>
+        <div style={{ fontSize: 11.5, color: '#8792A3', marginTop: 2, lineHeight: 1.35 }}>
+          {subtitle}
+        </div>
+      </div>
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={accent}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ flex: '0 0 auto' }}
+      >
+        <path d="m9 6 6 6-6 6" />
+      </svg>
+    </button>
+  );
+}
+
+export default function Profile({ onBack, onOpenAccuracy, onOpenRankings }) {
   const { user, logout } = useAuth();
 
   if (!user) {
@@ -62,96 +125,35 @@ export default function Profile({ onBack, onOpenAccuracy }) {
         </div>
       </div>
 
-      {/* ── Performance ── */}
+      {/* ── Performance & Rankings ── */}
       <div className="sec-head">
-        <h2>Performance</h2>
+        <h2>Insights</h2>
         <span>Stats</span>
       </div>
 
-      <button
+      <InsightCard
+        accent="#C8F751"
+        title="Prediction Accuracy"
+        subtitle="Win rates by league — best pick, sure bet, secondary, correct score"
         onClick={() => onOpenAccuracy && onOpenAccuracy()}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          width: 'calc(100% - 32px)',
-          margin: '0 16px',
-          padding: '14px 16px',
-          background:
-            'linear-gradient(140deg, rgba(200,247,81,0.08), rgba(200,247,81,0.02))',
-          border: '1px solid rgba(200,247,81,0.28)',
-          borderRadius: 12,
-          color: '#E9EEF6',
-          cursor: 'pointer',
-          fontFamily: 'inherit',
-          textAlign: 'left',
-          transition: '0.15s',
-        }}
-        onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.985)')}
-        onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-      >
-        <div
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            background: 'rgba(200,247,81,0.14)',
-            display: 'grid',
-            placeItems: 'center',
-            color: '#C8F751',
-            flex: '0 0 auto',
-          }}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
+        icon={
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
           </svg>
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 13.5,
-              fontWeight: 700,
-              color: '#E9EEF6',
-              letterSpacing: '-0.01em',
-            }}
-          >
-            Prediction Accuracy
-          </div>
-          <div
-            style={{
-              fontSize: 11.5,
-              color: '#8792A3',
-              marginTop: 2,
-              lineHeight: 1.35,
-            }}
-          >
-            Win rates by league — best pick, sure bet, secondary, correct score
-          </div>
-        </div>
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#C8F751"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ flex: '0 0 auto' }}
-        >
-          <path d="m9 6 6 6-6 6" />
-        </svg>
-      </button>
+        }
+      />
+
+      <InsightCard
+        accent="#5AA9FF"
+        title="Team Rankings"
+        subtitle="Best & worst home/away strength across all leagues"
+        onClick={() => onOpenRankings && onOpenRankings()}
+        icon={
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2z" />
+          </svg>
+        }
+      />
 
       {/* Adsterra Banner */}
       <BannerAd height={250} width={300} />

@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Matches from './pages/Matches';
 import MatchDetail from './pages/MatchDetail';
 import LeagueAccuracy from './pages/LeagueAccuracy';
+import TeamRankings from './pages/TeamRankings';
 import Compare from './pages/Compare';
 import Search from './pages/Search';
 import TeamDetail from './pages/TeamDetail';
@@ -69,28 +70,13 @@ export default function App() {
             FORM<em>LINE</em>
           </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* TEMPORARY: stats entry — will move to Profile once Profile.jsx is wired */}
-          <button
-            onClick={() => setScreen('accuracy')}
-            title="Prediction Accuracy"
-            style={{
-              background: 'transparent', border: 0, cursor: 'pointer',
-              color: '#C8F751', padding: 6, display: 'grid', placeItems: 'center',
-            }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
-            </svg>
-          </button>
-          <button
-            className="avatar"
-            onClick={() => setScreen('profile')}
-            title="Profile"
-          >
-            {initials}
-          </button>
-        </div>
+        <button
+          className="avatar"
+          onClick={() => setScreen('profile')}
+          title="Profile"
+        >
+          {initials}
+        </button>
       </header>
 
       <main className="main">
@@ -105,6 +91,9 @@ export default function App() {
         {screen === 'accuracy' && (
           <LeagueAccuracy onBack={() => go('profile')} />
         )}
+        {screen === 'rankings' && (
+          <TeamRankings onBack={() => go('profile')} />
+        )}
         {screen === 'compare' && (
           <Compare prefill={comparePrefill} clearPrefill={() => setComparePrefill(null)} />
         )}
@@ -117,11 +106,15 @@ export default function App() {
           />
         )}
         {screen === 'profile' && (
-          <Profile onBack={() => go('matches')} />
+          <Profile
+            onBack={() => go('matches')}
+            onOpenAccuracy={() => setScreen('accuracy')}
+            onOpenRankings={() => setScreen('rankings')}
+          />
         )}
       </main>
 
-      {screen !== 'profile' && screen !== 'match' && screen !== 'accuracy' && (
+      {screen !== 'profile' && screen !== 'match' && screen !== 'accuracy' && screen !== 'rankings' && (
         <nav className="tabbar">
           <button
             className={`tab ${screen === 'matches' ? 'active' : ''}`}
