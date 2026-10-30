@@ -5,6 +5,7 @@ import Matches from './pages/Matches';
 import MatchDetail from './pages/MatchDetail';
 import LeagueAccuracy from './pages/LeagueAccuracy';
 import TeamRankings from './pages/TeamRankings';
+import BestMarkets from './pages/BestMarkets';
 import Compare from './pages/Compare';
 import Search from './pages/Search';
 import TeamDetail from './pages/TeamDetail';
@@ -18,6 +19,7 @@ export default function App() {
   const [openMatchId, setOpenMatchId] = useState(null);
   const [comparePrefill, setComparePrefill] = useState(null);
   const [teamBackTarget, setTeamBackTarget] = useState('search');
+  const [matchBackTarget, setMatchBackTarget] = useState('matches');
 
   if (loading) {
     return (
@@ -43,8 +45,9 @@ export default function App() {
     setScreen('team');
   }
 
-  function openMatch(id) {
+  function openMatch(id, from = 'matches') {
     setOpenMatchId(id);
+    setMatchBackTarget(from);
     setScreen('match');
   }
 
@@ -80,13 +83,18 @@ export default function App() {
       </header>
 
       <main className="main">
-        {screen === 'matches' && <Matches onOpenMatch={openMatch} />}
+        {screen === 'matches' && (
+          <Matches onOpenMatch={(id) => openMatch(id, 'matches')} />
+        )}
         {screen === 'match' && openMatchId && (
           <MatchDetail
             matchId={openMatchId}
-            onBack={() => go('matches')}
+            onBack={() => go(matchBackTarget)}
             onOpenTeam={(id) => openTeam(id, 'match')}
           />
+        )}
+        {screen === 'markets' && (
+          <BestMarkets onOpenMatch={(id) => openMatch(id, 'markets')} />
         )}
         {screen === 'accuracy' && (
           <LeagueAccuracy onBack={() => go('profile')} />
@@ -125,6 +133,17 @@ export default function App() {
               <path d="M3 9h18M8 2v4M16 2v4" />
             </svg>
             Matches
+          </button>
+          <button
+            className={`tab ${screen === 'markets' ? 'active' : ''}`}
+            onClick={() => go('markets')}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="6" />
+              <circle cx="12" cy="12" r="2" />
+            </svg>
+            Picks
           </button>
           <button
             className={`tab ${screen === 'compare' ? 'active' : ''}`}

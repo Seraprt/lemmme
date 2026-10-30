@@ -76,3 +76,8 @@ export const rankingsApi = {
   list: (type, { limit = 20, minMatches = 10 } = {}) =>
     api(`/rankings?type=${type}&limit=${limit}&min_matches=${minMatches}`, { auth: false }),
 };
+// ───── Best Markets ─────
+export const marketsApi = {
+  best: (type, { days = 7, limit = 20 } = {}) =>
+    api(`/markets/best?type=${type}&days=${days}&limit=${limit}`, { auth: false }),
+};

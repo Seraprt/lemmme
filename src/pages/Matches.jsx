@@ -35,6 +35,7 @@ function derivePick(match) {
   return 'Draw';
 }
 
+// ── Daily message card ──
 function DailyMessageCard({ heading, body }) {
   return (
     <div
@@ -67,6 +68,7 @@ function DailyMessageCard({ heading, body }) {
   );
 }
 
+// ── Single match card (unchanged) ──
 function MatchCard({ match, isOpen, onToggle, onOpen }) {
   const confidence = match.confidence || 0;
   const pick = derivePick(match);
@@ -167,6 +169,65 @@ function MatchCard({ match, isOpen, onToggle, onOpen }) {
   );
 }
 
+// ── League section header + match list ──
+function LeagueSection({ league, matches, openSet, toggle, onOpen }) {
+  return (
+    <section style={{ marginBottom: 22 }}>
+      {/* League header card */}
+      <div
+        style={{
+          background: 'linear-gradient(140deg, rgba(200,247,81,0.10), rgba(200,247,81,0.02))',
+          border: '1px solid rgba(200,247,81,0.28)',
+          borderRadius: 12,
+          padding: '12px 14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 10,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <div style={{
+            width: 8, height: 8, borderRadius: '50%',
+            background: '#C8F751', flexShrink: 0,
+            boxShadow: '0 0 8px rgba(200,247,81,0.5)',
+          }} />
+          <span
+            style={{
+              fontSize: 13.5, fontWeight: 800, color: '#E9EEF6',
+              letterSpacing: '-0.01em', overflow: 'hidden',
+              textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}
+          >
+            {league}
+          </span>
+        </div>
+        <span
+          style={{
+            fontSize: 10.5, fontWeight: 800, color: '#C8F751',
+            letterSpacing: '0.06em', textTransform: 'uppercase',
+            flexShrink: 0,
+          }}
+        >
+          {matches.length} {matches.length === 1 ? 'match' : 'matches'}
+        </span>
+      </div>
+
+      {/* Matches inside */}
+      {matches.map((m) => (
+        <MatchCard
+          key={m.match_id}
+          match={m}
+          isOpen={openSet.has(m.match_id)}
+          onToggle={() => toggle(m.match_id)}
+          onOpen={onOpen}
+        />
+      ))}
+    </section>
+  );
+}
+
 export default function Matches({ onOpenMatch = () => {} }) {
   const [day, setDay] = useState(0);
   const [customDate, setCustomDate] = useState('');
@@ -217,32 +278,52 @@ export default function Matches({ onOpenMatch = () => {} }) {
     });
   };
 
+  // ── Group matches by league ──
+  const groups = useMemo(() => {
+    const map = {};
+    matches.forEach((m) => {
+      const lg = m.tournament || 'Other';
+      if (!map[lg]) map[lg] = [];
+      map[lg].push(m);
+    });
+    return Object.entries(map)
+      .map(([league, ms]) => ({ league, matches: ms }))
+      .sort((a, b) => {
+        // Most matches first; ties alphabetical
+        if (b.matches.length !== a.matches.length) {
+          return b.matches.length - a.matches.length;
+        }
+        return a.league.localeCompare(b.league);
+      });
+  }, [matches]);
+
+  // ── Build cards array with ads between groups ──
   const cards = useMemo(() => {
     const items = [];
-    matches.forEach((m, idx) => {
+    groups.forEach((g, idx) => {
       items.push(
-        <MatchCard
-          key={m.match_id}
-          match={m}
-          isOpen={openSet.has(m.match_id)}
-          onToggle={() => toggle(m.match_id)}
+        <LeagueSection
+          key={g.league}
+          league={g.league}
+          matches={g.matches}
+          openSet={openSet}
+          toggle={toggle}
           onOpen={onOpenMatch}
         />
       );
 
-      if (idx === 2) {
-        items.push(<BannerAd key={`banner-${m.match_id}`} height={250} width={300} />);
-        items.push(<Smartlink key={`sl-${m.match_id}`} text="Special Offer" type="adsterra" />);
+      const isLast = idx === groups.length - 1;
+      // Every 2 groups: banner
+      if (!isLast && (idx + 1) % 2 === 0) {
+        items.push(<BannerAd key={`b-${idx}`} height={250} width={300} />);
       }
-      if (idx === 5) {
-        items.push(<Smartlink key={`sl2-${m.match_id}`} text="Sponsored" type="monetag" />);
-      }
-      if (idx === 8) {
-        items.push(<BannerAd key={`banner2-${m.match_id}`} height={250} width={300} />);
+      // Every 3 groups: smartlink
+      if (!isLast && (idx + 1) % 3 === 0) {
+        items.push(<Smartlink key={`s-${idx}`} text="Special Offer" type="adsterra" />);
       }
     });
     return items;
-  }, [matches, openSet, onOpenMatch]);
+  }, [groups, openSet, onOpenMatch]);
 
   return (
     <div className="screen">
@@ -308,6 +389,7 @@ export default function Matches({ onOpenMatch = () => {} }) {
         ))}
       </div>
 
+      {/* Top banner */}
       <BannerAd height={250} width={300} />
 
       <div className="list">
@@ -327,6 +409,13 @@ export default function Matches({ onOpenMatch = () => {} }) {
 
         {!loading && cards}
       </div>
+
+      {/* Bottom smartlink before social */}
+      {!loading && cards.length > 0 && (
+        <div style={{ marginTop: 6 }}>
+          <Smartlink text="Sponsored" type="monetag" />
+        </div>
+      )}
 
       <SocialLinks title="Follow Formline" />
 
