@@ -169,29 +169,41 @@ function MatchCard({ match, isOpen, onToggle, onOpen }) {
   );
 }
 
-// ── League section header + match list ──
+// ── Collapsible league section ──
 function LeagueSection({ league, matches, openSet, toggle, onOpen }) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <section style={{ marginBottom: 22 }}>
-      {/* League header card */}
-      <div
+    <section style={{ marginBottom: 12 }}>
+      {/* League header — clickable */}
+      <button
+        onClick={() => setExpanded((v) => !v)}
         style={{
-          background: 'linear-gradient(140deg, rgba(200,247,81,0.10), rgba(200,247,81,0.02))',
-          border: '1px solid rgba(200,247,81,0.28)',
+          width: '100%',
+          background: expanded
+            ? 'linear-gradient(140deg, rgba(200,247,81,0.14), rgba(200,247,81,0.04))'
+            : 'linear-gradient(140deg, rgba(200,247,81,0.10), rgba(200,247,81,0.02))',
+          border: '1px solid ' + (expanded ? 'rgba(200,247,81,0.45)' : 'rgba(200,247,81,0.28)'),
           borderRadius: 12,
-          padding: '12px 14px',
+          padding: '14px 14px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           gap: 10,
-          marginBottom: 10,
+          cursor: 'pointer',
+          fontFamily: 'inherit',
+          textAlign: 'left',
+          transition: '0.15s',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
           <div style={{
             width: 8, height: 8, borderRadius: '50%',
             background: '#C8F751', flexShrink: 0,
-            boxShadow: '0 0 8px rgba(200,247,81,0.5)',
+            boxShadow: expanded
+              ? '0 0 12px rgba(200,247,81,0.9)'
+              : '0 0 8px rgba(200,247,81,0.5)',
+            transition: '0.15s',
           }} />
           <span
             style={{
@@ -203,27 +215,48 @@ function LeagueSection({ league, matches, openSet, toggle, onOpen }) {
             {league}
           </span>
         </div>
-        <span
-          style={{
-            fontSize: 10.5, fontWeight: 800, color: '#C8F751',
-            letterSpacing: '0.06em', textTransform: 'uppercase',
-            flexShrink: 0,
-          }}
-        >
-          {matches.length} {matches.length === 1 ? 'match' : 'matches'}
-        </span>
-      </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <span
+            style={{
+              fontSize: 10.5, fontWeight: 800, color: '#C8F751',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+            }}
+          >
+            {matches.length} {matches.length === 1 ? 'match' : 'matches'}
+          </span>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#C8F751"
+            strokeWidth="2.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{
+              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.25s',
+            }}
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+      </button>
 
-      {/* Matches inside */}
-      {matches.map((m) => (
-        <MatchCard
-          key={m.match_id}
-          match={m}
-          isOpen={openSet.has(m.match_id)}
-          onToggle={() => toggle(m.match_id)}
-          onOpen={onOpen}
-        />
-      ))}
+      {/* Matches (only when expanded) */}
+      {expanded && (
+        <div style={{ marginTop: 10 }}>
+          {matches.map((m) => (
+            <MatchCard
+              key={m.match_id}
+              match={m}
+              isOpen={openSet.has(m.match_id)}
+              onToggle={() => toggle(m.match_id)}
+              onOpen={onOpen}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -289,7 +322,6 @@ export default function Matches({ onOpenMatch = () => {} }) {
     return Object.entries(map)
       .map(([league, ms]) => ({ league, matches: ms }))
       .sort((a, b) => {
-        // Most matches first; ties alphabetical
         if (b.matches.length !== a.matches.length) {
           return b.matches.length - a.matches.length;
         }
@@ -313,11 +345,9 @@ export default function Matches({ onOpenMatch = () => {} }) {
       );
 
       const isLast = idx === groups.length - 1;
-      // Every 2 groups: banner
       if (!isLast && (idx + 1) % 2 === 0) {
         items.push(<BannerAd key={`b-${idx}`} height={250} width={300} />);
       }
-      // Every 3 groups: smartlink
       if (!isLast && (idx + 1) % 3 === 0) {
         items.push(<Smartlink key={`s-${idx}`} text="Special Offer" type="adsterra" />);
       }
@@ -410,7 +440,6 @@ export default function Matches({ onOpenMatch = () => {} }) {
         {!loading && cards}
       </div>
 
-      {/* Bottom smartlink before social */}
       {!loading && cards.length > 0 && (
         <div style={{ marginTop: 6 }}>
           <Smartlink text="Sponsored" type="monetag" />
