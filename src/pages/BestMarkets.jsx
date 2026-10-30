@@ -128,7 +128,7 @@ export default function BestMarkets({ onOpenMatch }) {
     setLoading(true);
     setError(null);
     marketsApi
-      .best(tab, { days: 7, limit: 20 })
+      .best(tab, { days: 7, limit: 200 })
       .then(setData)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));

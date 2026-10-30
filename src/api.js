@@ -79,6 +79,8 @@ export const rankingsApi = {
 };
 // ───── Best Markets ─────
 export const marketsApi = {
-  best: (type, { days = 20 , limit = 20 } = {}) =>
+  best: (type, { days = 20 , limit = 200
+
+   } = {}) =>
     api(`/markets/best?type=${type}&days=${days}&limit=${limit}`, { auth: false }),
 };
